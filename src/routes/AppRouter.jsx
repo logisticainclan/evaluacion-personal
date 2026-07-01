@@ -1,30 +1,31 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Login from '../pages/Login'
-import Dashboard from '../pages/Dashboard'
-import Layout from '../components/layout/Layout'
-import Personal from '../pages/Personal'
-import Usuarios from '../pages/Usuarios'
-import Secciones from '../pages/Secciones'
-import Niveles from '../pages/Niveles'
-import Items from '../pages/Items'
-import Asignaciones from '../pages/Asignaciones'
-import Evaluaciones from '../pages/Evaluaciones'
-import Evaluacion from '../pages/Evaluacion'
-import Periodos from '../pages/Periodos'
-import { obtenerUsuarioActual } from '../lib/auth'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Login from "../pages/Login";
+import Dashboard from "../pages/Dashboard";
+import Layout from "../components/layout/Layout";
+import Personal from "../pages/Personal";
+import Usuarios from "../pages/Usuarios";
+import Secciones from "../pages/Secciones";
+import Niveles from "../pages/Niveles";
+import Items from "../pages/Items";
+import Asignaciones from "../pages/Asignaciones";
+import Evaluaciones from "../pages/Evaluaciones";
+import Evaluacion from "../pages/Evaluacion";
+import Periodos from "../pages/Periodos";
+import { obtenerUsuarioActual } from "../lib/auth";
+import Resultados from "../pages/Resultados";
 
 function RutaProtegida({ children, roles }) {
-  const usuario = obtenerUsuarioActual()
+  const usuario = obtenerUsuarioActual();
 
   if (!usuario) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login" replace />;
   }
 
   if (roles && !roles.includes(usuario.rol)) {
-    return <Navigate to="/admin/dashboard" replace />
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
-  return children
+  return children;
 }
 
 function AppRouter() {
@@ -47,7 +48,7 @@ function AppRouter() {
           <Route
             path="personal"
             element={
-              <RutaProtegida roles={['admin']}>
+              <RutaProtegida roles={["admin"]}>
                 <Personal />
               </RutaProtegida>
             }
@@ -56,7 +57,7 @@ function AppRouter() {
           <Route
             path="usuarios"
             element={
-              <RutaProtegida roles={['admin']}>
+              <RutaProtegida roles={["admin"]}>
                 <Usuarios />
               </RutaProtegida>
             }
@@ -65,7 +66,7 @@ function AppRouter() {
           <Route
             path="asignaciones"
             element={
-              <RutaProtegida roles={['admin']}>
+              <RutaProtegida roles={["admin"]}>
                 <Asignaciones />
               </RutaProtegida>
             }
@@ -74,7 +75,7 @@ function AppRouter() {
           <Route
             path="periodos"
             element={
-              <RutaProtegida roles={['admin']}>
+              <RutaProtegida roles={["admin"]}>
                 <Periodos />
               </RutaProtegida>
             }
@@ -83,7 +84,7 @@ function AppRouter() {
           <Route
             path="secciones"
             element={
-              <RutaProtegida roles={['admin']}>
+              <RutaProtegida roles={["admin"]}>
                 <Secciones />
               </RutaProtegida>
             }
@@ -92,7 +93,7 @@ function AppRouter() {
           <Route
             path="niveles"
             element={
-              <RutaProtegida roles={['admin']}>
+              <RutaProtegida roles={["admin"]}>
                 <Niveles />
               </RutaProtegida>
             }
@@ -101,7 +102,7 @@ function AppRouter() {
           <Route
             path="items"
             element={
-              <RutaProtegida roles={['admin']}>
+              <RutaProtegida roles={["admin"]}>
                 <Items />
               </RutaProtegida>
             }
@@ -110,7 +111,7 @@ function AppRouter() {
           <Route
             path="evaluaciones"
             element={
-              <RutaProtegida roles={['admin', 'evaluador']}>
+              <RutaProtegida roles={["admin", "evaluador"]}>
                 <Evaluaciones />
               </RutaProtegida>
             }
@@ -119,7 +120,7 @@ function AppRouter() {
           <Route
             path="evaluaciones/nueva"
             element={
-              <RutaProtegida roles={['admin', 'evaluador']}>
+              <RutaProtegida roles={["admin", "evaluador"]}>
                 <Evaluacion />
               </RutaProtegida>
             }
@@ -128,15 +129,24 @@ function AppRouter() {
           <Route
             path="evaluaciones/:id"
             element={
-              <RutaProtegida roles={['admin', 'evaluador']}>
+              <RutaProtegida roles={["admin", "evaluador"]}>
                 <Evaluacion />
+              </RutaProtegida>
+            }
+          />
+
+          <Route
+            path="resultados"
+            element={
+              <RutaProtegida roles={["admin"]}>
+                <Resultados />
               </RutaProtegida>
             }
           />
         </Route>
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default AppRouter
+export default AppRouter;

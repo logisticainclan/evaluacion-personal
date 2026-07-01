@@ -1,9 +1,18 @@
-function StatusBadge({ active }) {
-  return (
-    <span className={`status ${active ? 'activo' : 'inactivo'}`}>
-      {active ? 'Activo' : 'Inactivo'}
-    </span>
-  )
+function StatusBadge({
+    children,
+    color="gray"
+}){
+
+    return(
+
+        <span className={`status ${color}`}>
+
+            {children}
+
+        </span>
+
+    )
+
 }
 
 export default StatusBadge

@@ -10,10 +10,11 @@ import {
   CheckSquare,
   UserCheck,
   CalendarDays,
-  LogOut
+  LogOut,
 } from "lucide-react";
 
 import { obtenerUsuarioActual, cerrarSesion } from "../../lib/auth";
+import { Trophy } from "lucide-react";
 
 function Sidebar() {
   const usuario = obtenerUsuarioActual();
@@ -28,7 +29,6 @@ function Sidebar() {
       </div>
 
       <nav>
-
         <NavLink to="/admin/dashboard">
           <LayoutDashboard size={20} />
           Dashboard
@@ -58,6 +58,11 @@ function Sidebar() {
               Usuarios
             </NavLink>
 
+            <NavLink to="/admin/resultados">
+              <Trophy size={20} />
+              Resultados
+            </NavLink>
+
             <NavLink to="/admin/asignaciones">
               <UserCheck size={20} />
               Asignación de Evaluadores
@@ -84,13 +89,9 @@ function Sidebar() {
             </NavLink>
           </>
         )}
-
       </nav>
 
-      <button
-        className="logout-btn"
-        onClick={cerrarSesion}
-      >
+      <button className="logout-btn" onClick={cerrarSesion}>
         <LogOut size={20} />
         Salir
       </button>
