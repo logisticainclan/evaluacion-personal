@@ -788,3 +788,32 @@ th {
 .empty-state p {
   margin: 0;
 }
+
+.dashboard-card {
+  margin-top: 24px;
+}
+
+.dashboard-card h2 {
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+
+.dashboard-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dashboard-row:last-child {
+  border-bottom: none;
+}
+
+.dashboard-row span {
+  color: #6b7280;
+}
+
+.dashboard-row strong {
+  color: #1e40af;
+  font-size: 22px;
+}

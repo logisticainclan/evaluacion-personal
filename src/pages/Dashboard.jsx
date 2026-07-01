@@ -1,107 +1,129 @@
-import { useEffect, useState } from "react";
-import { obtenerUsuarioActual } from "../lib/auth";
+import { useEffect, useState } from "react"
+import { obtenerUsuarioActual } from "../lib/auth"
 import {
   obtenerDashboardAdmin,
   obtenerDashboardEvaluador
-} from "../services/dashboardService";
+} from "../services/dashboardService"
+import { StatCard, Card } from "../components/ui"
 
 function Dashboard() {
-  const usuario = obtenerUsuarioActual();
-  const [data, setData] = useState(null);
+  const usuario = obtenerUsuarioActual()
+  const [data, setData] = useState(null)
 
   useEffect(() => {
-    cargar();
-  }, []);
+    cargar()
+  }, [])
 
   const cargar = async () => {
     const respuesta =
       usuario?.rol === "admin"
         ? await obtenerDashboardAdmin()
-        : await obtenerDashboardEvaluador();
+        : await obtenerDashboardEvaluador()
 
     if (respuesta.error) {
-      alert(respuesta.error.message);
-      return;
+      alert(respuesta.error.message)
+      return
     }
 
-    setData(respuesta.data);
-  };
-
-  if (!data) return <p>Cargando dashboard...</p>;
-
-  if (usuario?.rol === "admin") {
-    return (
-      <div>
-        <h1>Dashboard Administrador</h1>
-
-        <div className="stats-grid">
-          <div className="stat-card">
-            <h3>Período activo</h3>
-            <strong>{data.periodo?.anio} - {data.periodo?.nombre}</strong>
-          </div>
-
-          <div className="stat-card">
-            <h3>Personal</h3>
-            <strong>{data.totalPersonal}</strong>
-          </div>
-
-          <div className="stat-card">
-            <h3>Usuarios</h3>
-            <strong>{data.totalUsuarios}</strong>
-          </div>
-
-          <div className="stat-card">
-            <h3>Evaluaciones</h3>
-            <strong>{data.totalEvaluaciones}</strong>
-          </div>
-        </div>
-      </div>
-    );
+    setData(respuesta.data)
   }
+
+  if (!data) return <p>Cargando dashboard...</p>
 
   return (
     <div>
-      <h1>Dashboard Evaluador</h1>
-
-      <div className="stats-grid">
-        <div className="stat-card">
-          <h3>Período activo</h3>
-          <strong>{data.periodo?.anio} - {data.periodo?.nombre}</strong>
-        </div>
-
-        <div className="stat-card">
-          <h3>Asignados</h3>
-          <strong>{data.total}</strong>
-        </div>
-
-        <div className="stat-card">
-          <h3>Pendientes</h3>
-          <strong>{data.pendientes}</strong>
-        </div>
-
-        <div className="stat-card">
-          <h3>Finalizadas</h3>
-          <strong>{data.finalizadas}</strong>
+      <div className="page-header">
+        <div>
+          <h1>
+            {usuario?.rol === "admin"
+              ? "Dashboard Administrador"
+              : "Dashboard Evaluador"}
+          </h1>
+          <p>Resumen general del sistema de evaluación</p>
         </div>
       </div>
 
-      <div className="progress-card">
-        <div className="progress-header">
-          <strong>Avance de evaluación</strong>
-          <span>{data.progreso}%</span>
-        </div>
+      {usuario?.rol === "admin" ? (
+        <>
+          <div className="stats-grid">
+            <StatCard
+              title="Período activo"
+              value={`${data.periodo?.anio || "-"} - ${data.periodo?.nombre || "-"}`}
+            />
 
-        <div className="progress-track">
-          <div
-            className="progress-fill"
-            style={{ width: `${data.progreso}%` }}
-          />
-        </div>
+            <StatCard
+              title="Personal"
+              value={data.totalPersonal}
+            />
 
-        <p>{data.finalizadas} de {data.total} evaluaciones finalizadas.</p>
-      </div>
+            <StatCard
+              title="Usuarios"
+              value={data.totalUsuarios}
+            />
+
+            <StatCard
+              title="Evaluaciones"
+              value={data.totalEvaluaciones}
+            />
+          </div>
+
+          <Card className="dashboard-card">
+            <h2>Estado de evaluaciones</h2>
+
+            <div className="dashboard-row">
+              <span>Finalizadas</span>
+              <strong>{data.finalizadas}</strong>
+            </div>
+
+            <div className="dashboard-row">
+              <span>En proceso</span>
+              <strong>{data.proceso}</strong>
+            </div>
+          </Card>
+        </>
+      ) : (
+        <>
+          <div className="stats-grid">
+            <StatCard
+              title="Período activo"
+              value={`${data.periodo?.anio || "-"} - ${data.periodo?.nombre || "-"}`}
+            />
+
+            <StatCard
+              title="Asignados"
+              value={data.total}
+            />
+
+            <StatCard
+              title="Pendientes"
+              value={data.pendientes}
+            />
+
+            <StatCard
+              title="Finalizadas"
+              value={data.finalizadas}
+            />
+          </div>
+
+          <Card className="dashboard-card">
+            <div className="progress-header">
+              <strong>Avance de evaluación</strong>
+              <span>{data.progreso}%</span>
+            </div>
+
+            <div className="progress-track">
+              <div
+                className="progress-fill"
+                style={{ width: `${data.progreso}%` }}
+              />
+            </div>
+
+            <p>{data.finalizadas} de {data.total} evaluaciones finalizadas.</p>
+          </Card>
+        </>
+      )}
     </div>
-  );
+  )
 }
 
-export default Dashboard;
+export default Dashboard
