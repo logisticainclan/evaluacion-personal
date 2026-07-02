@@ -13,6 +13,7 @@ import Evaluacion from "../pages/Evaluacion";
 import Periodos from "../pages/Periodos";
 import { obtenerUsuarioActual } from "../lib/auth";
 import Resultados from "../pages/Resultados";
+import ReporteEvaluacion from "../pages/ReporteEvaluacion";
 
 function RutaProtegida({ children, roles }) {
   const usuario = obtenerUsuarioActual();
@@ -143,6 +144,15 @@ function AppRouter() {
               </RutaProtegida>
             }
           />
+
+          <Route
+          path="evaluaciones/:id/reporte"
+          element={
+            <RutaProtegida roles={["admin", "evaluador"]}>
+              <ReporteEvaluacion />
+            </RutaProtegida>
+          }
+        />
         </Route>
       </Routes>
     </BrowserRouter>

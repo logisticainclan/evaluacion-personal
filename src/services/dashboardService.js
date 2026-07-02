@@ -57,11 +57,61 @@ export async function obtenerDashboardAdmin() {
 
   const { data: evaluaciones } = await supabase
     .from("evaluaciones")
-    .select("estado");
+    .select(`
+      id,
+      estado,
+      promedio,
+      created_at,
+      personal (
+        nombres,
+        apellidos,
+        area
+      )
+    `)
+    .eq("periodo_id", periodo.data.id);
 
+  const totalEvaluaciones = evaluaciones?.length || 0;
   const finalizadas = evaluaciones?.filter(e => e.estado === "finalizada").length || 0;
   const proceso = evaluaciones?.filter(e => e.estado === "proceso").length || 0;
-  const totalEvaluaciones = evaluaciones?.length || 0;
+
+  const promedioInstitucional = finalizadas
+    ? evaluaciones
+        .filter(e => e.estado === "finalizada")
+        .reduce((acc, e) => acc + Number(e.promedio), 0) / finalizadas
+    : 0;
+
+  const ultimas = [...(evaluaciones || [])]
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 5);
+
+  const ranking = [...(evaluaciones || [])]
+    .filter(e => e.estado === "finalizada")
+    .sort((a, b) => Number(b.promedio) - Number(a.promedio))
+    .slice(0, 5);
+
+  const areas = {};
+
+  (evaluaciones || [])
+    .filter(e => e.estado === "finalizada")
+    .forEach(e => {
+      const area = e.personal?.area || "Sin área";
+
+      if (!areas[area]) {
+        areas[area] = {
+          total: 0,
+          suma: 0
+        };
+      }
+
+      areas[area].total += 1;
+      areas[area].suma += Number(e.promedio);
+    });
+
+  const promedioPorArea = Object.entries(areas).map(([area, info]) => ({
+    area,
+    promedio: info.suma / info.total,
+    total: info.total
+  }));
 
   return {
     data: {
@@ -70,7 +120,12 @@ export async function obtenerDashboardAdmin() {
       totalUsuarios,
       totalEvaluaciones,
       finalizadas,
-      proceso
+      proceso,
+      pendientes: Math.max(totalPersonal - finalizadas - proceso, 0),
+      promedioInstitucional,
+      ultimas,
+      ranking,
+      promedioPorArea
     },
     error: null
   };

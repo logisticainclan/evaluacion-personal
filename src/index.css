@@ -817,3 +817,45 @@ th {
   color: #1e40af;
   font-size: 22px;
 }
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.area-row {
+  padding: 14px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.area-row:last-child {
+  border-bottom: none;
+}
+
+.area-row > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.area-row span {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.area-score {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.area-score .progress-track {
+  flex: 1;
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}

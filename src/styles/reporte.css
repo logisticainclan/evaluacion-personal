@@ -1,0 +1,292 @@
+/* ===========================
+   CONTENEDOR
+=========================== */
+
+.reporte-page {
+  background: #e5e7eb;
+  padding: 30px;
+}
+
+.reporte-hoja {
+  background: #fff;
+  max-width: 900px;
+  margin: auto;
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* ===========================
+   BOTONES
+=========================== */
+
+.reporte-actions {
+  max-width: 900px;
+  margin: 0 auto 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+
+/* ===========================
+   ENCABEZADO
+=========================== */
+
+.reporte-header-institucional {
+  display: grid;
+  grid-template-columns: 90px repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 28px;
+  align-items: stretch;
+}
+
+.escudo-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.escudo-box img {
+  width: 80px;
+}
+
+.header-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 14px 10px;
+
+  text-align: center;
+
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.35;
+}
+
+.header-block.dark {
+  background: #9d9d9d;
+}
+
+.header-block.gray {
+  background: #c7c7c7;
+}
+
+
+/* ===========================
+   TITULOS
+=========================== */
+
+.reporte-hoja h2 {
+  font-size: 18px;
+  margin-top: 26px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #d1d5db;
+  padding-bottom: 6px;
+}
+
+.reporte-seccion h3 {
+  margin-top: 22px;
+  margin-bottom: 8px;
+  background: #f3f4f6;
+  padding: 8px 10px;
+}
+
+
+/* ===========================
+   DATOS GENERALES
+=========================== */
+
+.reporte-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 30px;
+}
+
+.reporte-grid p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+
+/* ===========================
+   TABLAS
+=========================== */
+
+.reporte-hoja table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.reporte-hoja th,
+.reporte-hoja td {
+  border: 1px solid #d1d5db;
+  padding: 8px;
+  font-size: 13px;
+}
+
+.reporte-hoja th {
+  background: #f3f4f6;
+}
+
+
+/* ===========================
+   RESULTADO
+=========================== */
+
+.resultado-box {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+
+  background: #f8fafc;
+
+  padding: 18px;
+
+  border-radius: 10px;
+}
+
+.resultado-box p {
+  margin: 0;
+}
+
+
+/* ===========================
+   OBSERVACION
+=========================== */
+
+.observacion-reporte {
+  border: 1px solid #d1d5db;
+  min-height: 90px;
+  padding: 12px;
+  margin-top: 10px;
+}
+
+
+/* ===========================
+   FIRMAS
+=========================== */
+
+.firmas {
+  margin-top: 80px;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+}
+
+.firma-box {
+  text-align: center;
+}
+
+.firma-linea {
+  width: 260px;
+  margin: 0 auto 10px;
+  border-top: 1.5px solid #000;
+}
+
+.firma-box h4 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.firma-box span {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+
+/* ===========================
+   LEMA
+=========================== */
+
+.lema {
+  margin-top: 45px;
+  text-align: center;
+  font-style: italic;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+
+/* ===========================
+   IMPRESION
+=========================== */
+
+@media print {
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  .sidebar,
+  .header,
+  .reporte-actions {
+    display: none !important;
+  }
+
+  .main-content,
+  .page-content,
+  .page-container {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .reporte-page {
+    background: white !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .reporte-hoja {
+    width: 100% !important;
+    max-width: none !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    box-shadow: none !important;
+  }
+
+  .reporte-header-institucional {
+    grid-template-columns: 90px repeat(5, 1fr);
+    gap: 8px;
+  }
+
+  .header-block.dark {
+    background: #9d9d9d !important;
+    color: white !important;
+  }
+
+  .header-block.gray {
+    background: #c7c7c7 !important;
+    color: white !important;
+  }
+
+  .reporte-seccion {
+    page-break-inside: avoid;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+}

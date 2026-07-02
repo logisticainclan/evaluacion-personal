@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { obtenerResultados } from "../services/resultadosService";
 import { DataTable, EmptyState, SearchInput } from "../components/ui"
+import { useNavigate } from "react-router-dom";
 
 function Resultados() {
   const [resultados, setResultados] = useState([]);
   const [busqueda, setBusqueda] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     cargar();
@@ -60,6 +62,7 @@ function Resultados() {
           "Puntaje",
           "Promedio",
           "Nivel",
+          "Acciones"
         ]}
       >
         {filtrados.map((r) => (
@@ -83,12 +86,29 @@ function Resultados() {
                 {obtenerNivel(r.promedio)}
               </span>
             </td>
+            <td>
+  <div className="actions">
+    <button
+      className="secondary-btn"
+      onClick={() => navigate(`/admin/evaluaciones/${r.id}`)}
+    >
+      Ver evaluación
+    </button>
+
+    <button
+      className="primary-btn"
+      onClick={() => navigate(`/admin/evaluaciones/${r.id}/reporte`)}
+    >
+      Ver reporte
+    </button>
+  </div>
+</td>
           </tr>
         ))}
 
         {filtrados.length === 0 && (
           <tr>
-            <td colSpan="7">
+            <td colSpan="8">
               <EmptyState
                 title="No hay resultados"
                 description="Aún no existen evaluaciones finalizadas."

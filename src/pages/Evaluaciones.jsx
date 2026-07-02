@@ -36,7 +36,8 @@ function Evaluaciones() {
   const finalizadas = registros.filter((r) => r.estado === "finalizada");
 
   const total = registros.length;
-  const progreso = total > 0 ? Math.round((finalizadas.length / total) * 100) : 0;
+  const progreso =
+    total > 0 ? Math.round((finalizadas.length / total) * 100) : 0;
 
   const renderCard = (r) => (
     <div className="eval-card" key={r.personal.id}>
@@ -47,25 +48,40 @@ function Evaluaciones() {
           {r.personal.apellidos}, {r.personal.nombres}
         </h3>
 
-        <p>{r.personal.area || "-"} · {r.personal.cargo || "-"}</p>
+        <p>
+          {r.personal.area || "-"} · {r.personal.cargo || "-"}
+        </p>
 
         {r.evaluacion && (
-          <small>
-            Promedio: {Number(r.evaluacion.promedio).toFixed(2)}
-          </small>
+          <small>Promedio: {Number(r.evaluacion.promedio).toFixed(2)}</small>
         )}
       </div>
 
-      <button
-        className={r.estado === "finalizada" ? "secondary-btn" : "primary-btn"}
-        onClick={() => irEvaluacion(r)}
-      >
-        {r.estado === "pendiente"
-          ? "Iniciar"
-          : r.estado === "finalizada"
-          ? "Ver evaluación"
-          : "Continuar"}
-      </button>
+      <div style={{ display: "flex", gap: 8 }}>
+        <button
+          className={
+            r.estado === "finalizada" ? "secondary-btn" : "primary-btn"
+          }
+          onClick={() => irEvaluacion(r)}
+        >
+          {r.estado === "pendiente"
+            ? "Iniciar"
+            : r.estado === "finalizada"
+              ? "Ver evaluación"
+              : "Continuar"}
+        </button>
+
+        {r.estado === "finalizada" && (
+          <button
+            className="primary-btn"
+            onClick={() =>
+              navigate(`/admin/evaluaciones/${r.evaluacion.id}/reporte`)
+            }
+          >
+            Ver reporte
+          </button>
+        )}
+      </div>
     </div>
   );
 
@@ -75,7 +91,8 @@ function Evaluaciones() {
         <div>
           <h1>Mis evaluaciones</h1>
           <p>
-            Periodo activo: {periodo ? `${periodo.anio} - ${periodo.nombre}` : "No configurado"}
+            Periodo activo:{" "}
+            {periodo ? `${periodo.anio} - ${periodo.nombre}` : "No configurado"}
           </p>
         </div>
       </div>
@@ -90,7 +107,9 @@ function Evaluaciones() {
           <div className="progress-fill" style={{ width: `${progreso}%` }} />
         </div>
 
-        <p>{finalizadas.length} de {total} evaluaciones finalizadas.</p>
+        <p>
+          {finalizadas.length} de {total} evaluaciones finalizadas.
+        </p>
       </div>
 
       <section className="eval-section">
