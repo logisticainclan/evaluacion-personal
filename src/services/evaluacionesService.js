@@ -1,6 +1,6 @@
 import { supabase } from "../lib/supabase";
 
-export async function obtenerPersonalAsignado(evaluadorId) {
+export async function obtenerPersonalAsignado(evaluadorId, periodoId) {
   return await supabase
     .from("evaluador_personal")
     .select(`
@@ -13,20 +13,34 @@ export async function obtenerPersonalAsignado(evaluadorId) {
         cargo
       )
     `)
-    .eq("evaluador_id", evaluadorId);
+    .eq("evaluador_id", evaluadorId)
+    .eq("periodo_id", periodoId);
 }
 
 export async function obtenerPersonalEvaluable() {
   const usuario = JSON.parse(localStorage.getItem("usuario_app"));
 
-  if (!usuario?.id) return { data: [], error: null };
+  if (!usuario?.id) {
+    return { data: [], error: null };
+  }
 
-  const { data, error } = await obtenerPersonalAsignado(usuario.id);
+  const periodoActivo = await obtenerPeriodoActivo();
 
-  if (error) return { data: [], error };
+  if (periodoActivo.error) {
+    return { data: [], error: periodoActivo.error };
+  }
+
+  const { data, error } = await obtenerPersonalAsignado(
+    usuario.id,
+    periodoActivo.data.id
+  );
+
+  if (error) {
+    return { data: [], error };
+  }
 
   return {
-    data: data.map((x) => x.personal),
+    data: (data || []).map((x) => x.personal).filter(Boolean),
     error: null
   };
 }
@@ -72,7 +86,8 @@ export async function obtenerPanelEvaluaciones() {
         cargo
       )
     `)
-    .eq("evaluador_id", usuario.id);
+    .eq("evaluador_id", usuario.id)
+    .eq("periodo_id", periodoActivo.data.id);
 
   if (errorAsignados) return { data: [], error: errorAsignados };
 
@@ -152,6 +167,43 @@ export async function guardarEvaluacionCompleta({
 
   const promedio = detalle.length ? puntajeTotal / detalle.length : 0;
 
+  if (!evaluacionId) {
+    const { data: existente, error: errorExistente } = await supabase
+      .from("evaluaciones")
+      .select("id, evaluador_id, estado")
+      .eq("personal_id", personalId)
+      .eq("periodo_id", periodoId)
+      .maybeSingle();
+
+    if (errorExistente) {
+      return { data: null, error: errorExistente };
+    }
+
+    if (existente?.id) {
+      if (existente.evaluador_id !== evaluadorId) {
+        return {
+          data: null,
+          error: {
+            message:
+              "Este personal ya tiene una evaluación registrada por otro evaluador."
+          }
+        };
+      }
+
+      if (existente.estado === "finalizada") {
+        return {
+          data: null,
+          error: {
+            message:
+              "Esta evaluación ya fue finalizada y no puede modificarse."
+          }
+        };
+      }
+
+      evaluacionId = existente.id;
+    }
+  }
+
   let evaluacion;
 
   if (evaluacionId) {
@@ -162,9 +214,11 @@ export async function guardarEvaluacionCompleta({
         promedio,
         observacion,
         estado: "proceso",
-        updated_at: new Date()
+        updated_at: new Date().toISOString()
       })
       .eq("id", evaluacionId)
+      .eq("evaluador_id", evaluadorId)
+      .neq("estado", "finalizada")
       .select()
       .single();
 
@@ -172,10 +226,14 @@ export async function guardarEvaluacionCompleta({
 
     evaluacion = data;
 
-    await supabase
+    const { error: errorEliminarDetalle } = await supabase
       .from("evaluacion_detalle")
       .delete()
       .eq("evaluacion_id", evaluacionId);
+
+    if (errorEliminarDetalle) {
+      return { data: null, error: errorEliminarDetalle };
+    }
   } else {
     const { data, error } = await supabase
       .from("evaluaciones")
@@ -209,7 +267,9 @@ export async function guardarEvaluacionCompleta({
     .from("evaluacion_detalle")
     .insert(detalleInsertar);
 
-  if (errorDetalle) return { data: null, error: errorDetalle };
+  if (errorDetalle) {
+    return { data: null, error: errorDetalle };
+  }
 
   return { data: evaluacion, error: null };
 }

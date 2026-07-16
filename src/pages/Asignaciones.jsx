@@ -4,13 +4,17 @@ import {
   obtenerEvaluadores,
   obtenerPersonal,
   obtenerAsignaciones,
-  guardarAsignaciones
+  guardarAsignaciones,
+  obtenerPersonalAsignadoPeriodo
 } from "../services/asignacionesService";
 
 function Asignaciones() {
 
   const [evaluadores, setEvaluadores] = useState([]);
+
   const [personal, setPersonal] = useState([]);
+
+  const [personalAsignado, setPersonalAsignado] = useState([]);
 
   const [evaluador, setEvaluador] = useState("");
 
@@ -28,6 +32,7 @@ function Asignaciones() {
 
     const e = await obtenerEvaluadores();
     const p = await obtenerPersonal();
+    const a = await obtenerPersonalAsignadoPeriodo();
 
     if (e.error) {
       alert(e.error.message);
@@ -41,6 +46,7 @@ function Asignaciones() {
 
     setEvaluadores(e.data || []);
     setPersonal(p.data || []);
+    setPersonalAsignado(a.data?.map(x => x.personal_id) || []);
   }
 
   useEffect(() => {
@@ -131,11 +137,19 @@ function Asignaciones() {
 ].sort();
 
 const personalFiltrado = personal.filter((p) => {
+
+  const asignadoAOtro =
+    personalAsignado.includes(p.id) &&
+    !seleccionados.includes(p.id);
+
+  if (asignadoAOtro) return false;
+
   const coincideArea = areaFiltro ? p.area === areaFiltro : true;
 
-  const coincideBusqueda = `${p.dni} ${p.nombres} ${p.apellidos} ${p.area || ""}`
-    .toLowerCase()
-    .includes(busqueda.toLowerCase());
+  const coincideBusqueda =
+    `${p.dni} ${p.nombres} ${p.apellidos} ${p.area || ""}`
+      .toLowerCase()
+      .includes(busqueda.toLowerCase());
 
   return coincideArea && coincideBusqueda;
 });

@@ -1,34 +1,34 @@
-import { useEffect, useState } from "react"
-import { obtenerUsuarioActual } from "../lib/auth"
+import { useEffect, useState } from "react";
+import { obtenerUsuarioActual } from "../lib/auth";
 import {
   obtenerDashboardAdmin,
-  obtenerDashboardEvaluador
-} from "../services/dashboardService"
-import { StatCard, Card } from "../components/ui"
+  obtenerDashboardEvaluador,
+} from "../services/dashboardService";
+import { StatCard, Card } from "../components/ui";
 
 function Dashboard() {
-  const usuario = obtenerUsuarioActual()
-  const [data, setData] = useState(null)
+  const usuario = obtenerUsuarioActual();
+  const [data, setData] = useState(null);
 
   useEffect(() => {
-    cargar()
-  }, [])
+    cargar();
+  }, []);
 
   const cargar = async () => {
     const respuesta =
       usuario?.rol === "admin"
         ? await obtenerDashboardAdmin()
-        : await obtenerDashboardEvaluador()
+        : await obtenerDashboardEvaluador();
 
     if (respuesta.error) {
-      alert(respuesta.error.message)
-      return
+      alert(respuesta.error.message);
+      return;
     }
 
-    setData(respuesta.data)
-  }
+    setData(respuesta.data);
+  };
 
-  if (!data) return <p>Cargando dashboard...</p>
+  if (!data) return <p>Cargando dashboard...</p>;
 
   if (usuario?.rol !== "admin") {
     return (
@@ -41,7 +41,10 @@ function Dashboard() {
         </div>
 
         <div className="stats-grid">
-          <StatCard title="Período activo" value={`${data.periodo?.anio || "-"} - ${data.periodo?.nombre || "-"}`} />
+          <StatCard
+            title="Período activo"
+            value={`${data.periodo?.anio || "-"} - ${data.periodo?.nombre || "-"}`}
+          />
           <StatCard title="Asignados" value={data.total} />
           <StatCard title="Pendientes" value={data.pendientes} />
           <StatCard title="Finalizadas" value={data.finalizadas} />
@@ -54,13 +57,18 @@ function Dashboard() {
           </div>
 
           <div className="progress-track">
-            <div className="progress-fill" style={{ width: `${data.progreso}%` }} />
+            <div
+              className="progress-fill"
+              style={{ width: `${data.progreso}%` }}
+            />
           </div>
 
-          <p>{data.finalizadas} de {data.total} evaluaciones finalizadas.</p>
+          <p>
+            {data.finalizadas} de {data.total} evaluaciones finalizadas.
+          </p>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -69,7 +77,8 @@ function Dashboard() {
         <div>
           <h1>Dashboard Administrador</h1>
           <p>
-            Resumen del período {data.periodo?.anio || "-"} - {data.periodo?.nombre || "-"}
+            Resumen del período {data.periodo?.anio || "-"} -{" "}
+            {data.periodo?.nombre || "-"}
           </p>
         </div>
       </div>
@@ -78,27 +87,46 @@ function Dashboard() {
         <StatCard title="Personal" value={data.totalPersonal} />
         <StatCard title="Usuarios" value={data.totalUsuarios} />
         <StatCard title="Evaluaciones" value={data.totalEvaluaciones} />
-        <StatCard title="Promedio institucional" value={Number(data.promedioInstitucional).toFixed(2)} />
+        <StatCard
+          title="Promedio institucional"
+          value={Number(data.promedioInstitucional).toFixed(2)}
+          description="Promedio general del período"
+        />
       </div>
 
       <div className="dashboard-grid">
         <Card className="dashboard-card">
           <h2>Estado de evaluaciones</h2>
 
-          <div className="dashboard-row">
-            <span>Finalizadas</span>
-            <strong>{data.finalizadas}</strong>
-          </div>
+          {[
+            { label: "Finalizadas", value: data.finalizadas },
+            { label: "En proceso", value: data.proceso },
+            { label: "Pendientes", value: data.pendientes },
+          ].map((item) => {
+            const totalEstados =
+              data.finalizadas + data.proceso + data.pendientes;
 
-          <div className="dashboard-row">
-            <span>En proceso</span>
-            <strong>{data.proceso}</strong>
-          </div>
+            const porcentaje =
+              totalEstados > 0
+                ? Math.round((item.value / totalEstados) * 100)
+                : 0;
 
-          <div className="dashboard-row">
-            <span>Pendientes</span>
-            <strong>{data.pendientes}</strong>
-          </div>
+            return (
+              <div className="chart-row" key={item.label}>
+                <div className="chart-label">
+                  <span>{item.label}</span>
+                  <strong>{item.value}</strong>
+                </div>
+
+                <div className="chart-track">
+                  <div
+                    className="chart-fill"
+                    style={{ width: `${porcentaje}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </Card>
 
         <Card className="dashboard-card">
@@ -107,10 +135,14 @@ function Dashboard() {
           {data.ranking.length === 0 && <p>No hay evaluaciones finalizadas.</p>}
 
           {data.ranking.map((e, index) => (
-            <div className="dashboard-row" key={e.id}>
-              <span>
-                {index + 1}. {e.personal?.apellidos}, {e.personal?.nombres}
-              </span>
+            <div className="ranking-row" key={e.id}>
+              <div>
+                <strong>#{index + 1}</strong>
+                <span>
+                  {e.personal?.apellidos}, {e.personal?.nombres}
+                </span>
+              </div>
+
               <strong>{Number(e.promedio).toFixed(2)}</strong>
             </div>
           ))}
@@ -159,7 +191,7 @@ function Dashboard() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
 
-export default Dashboard
+export default Dashboard;

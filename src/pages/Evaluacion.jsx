@@ -7,6 +7,7 @@ import ObservacionBox from "../components/evaluacion/ObservacionBox";
 import ResumenEvaluacion from "../components/evaluacion/ResumenEvaluacion";
 import "../styles/evaluacion.css";
 import EvaluacionSidebar from "../components/evaluacion/EvaluacionSidebar";
+import { Toast } from "../lib/toast";
 
 import {
   obtenerPersonalEvaluable,
@@ -102,32 +103,32 @@ function Evaluacion() {
     const usuario = JSON.parse(localStorage.getItem("usuario_app"));
 
     if (soloLectura) {
-      alert("Esta evaluación ya fue finalizada");
+      Toast.error("Esta evaluación ya fue finalizada");
       return;
     }
 
     if (!personalSeleccionado) {
-      alert("Seleccione el personal a evaluar");
+      Toast.error("Seleccione el personal a evaluar");
       return;
     }
 
     if (!usuario?.id) {
-      alert("No se encontró el usuario evaluador");
+      Toast.error("No se encontró el usuario evaluador");
       return;
     }
 
     if (!periodo?.id) {
-      alert("No hay periodo activo");
+      Toast.error("No hay período activo");
       return;
     }
 
     if (Object.keys(respuestas).length === 0) {
-      alert("Debe calificar al menos un ítem para guardar el borrador");
+      Toast.error("Debe calificar al menos un ítem para guardar el borrador");
       return;
     }
 
     if (observacion.length > 250) {
-      alert("La observación no debe superar los 250 caracteres");
+      Toast.error("La observación no debe superar los 250 caracteres");
       return;
     }
 
@@ -145,14 +146,14 @@ function Evaluacion() {
     setGuardando(false);
 
     if (error) {
-      alert(error.message);
+      Toast.error(error.message);
       return;
     }
 
     setEvaluacionId(data.id);
     setEstado(data.estado);
 
-    alert("Avance guardado correctamente");
+    Toast.success("Avance guardado correctamente");
   };
 
   const finalizar = async () => {
@@ -196,7 +197,7 @@ function Evaluacion() {
       return;
     }
 
-    alert("Evaluación finalizada correctamente");
+    Toast.success("Evaluación finalizada correctamente");
     navigate("/admin/evaluaciones");
   };
 
@@ -265,12 +266,12 @@ function Evaluacion() {
             ))}
 
           {indiceActual === secciones.length - 1 && (
-  <ObservacionBox
-    observacion={observacion}
-    setObservacion={setObservacion}
-    disabled={soloLectura}
-  />
-)}
+            <ObservacionBox
+              observacion={observacion}
+              setObservacion={setObservacion}
+              disabled={soloLectura}
+            />
+          )}
 
           {/* 👇 AQUÍ VA EL PASO 2 */}
           <div className="evaluacion-navigation">
@@ -304,12 +305,12 @@ function Evaluacion() {
         </div>
 
         <div className="evaluacion-resumen-side">
-  <ResumenEvaluacion
-    respuestas={respuestas}
-    totalItems={totalItems}
-    progreso={progreso}
-  />
-</div>
+          <ResumenEvaluacion
+            respuestas={respuestas}
+            totalItems={totalItems}
+            progreso={progreso}
+          />
+        </div>
       </div>
     </div>
   );
