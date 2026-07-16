@@ -5,6 +5,7 @@ import {
   obtenerDashboardEvaluador,
 } from "../services/dashboardService";
 import { StatCard, Card } from "../components/ui";
+import { Toast } from "../lib/toast";
 
 function Dashboard() {
   const usuario = obtenerUsuarioActual();
@@ -21,7 +22,7 @@ function Dashboard() {
         : await obtenerDashboardEvaluador();
 
     if (respuesta.error) {
-      alert(respuesta.error.message);
+      Toast.error(respuesta.error.message);
       return;
     }
 

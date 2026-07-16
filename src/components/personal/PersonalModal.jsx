@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Toast } from "../../lib/toast";
 
 const formInicial = {
   dni: '',
@@ -35,7 +36,7 @@ function PersonalModal({ abierto, onCerrar, onGuardar, areas, cargos, personalEd
     e.preventDefault()
 
     if (form.dni.length !== 8) {
-      alert('El DNI debe tener 8 dígitos')
+      Toast.error("El DNI debe tener 8 dígitos");
       return
     }
 

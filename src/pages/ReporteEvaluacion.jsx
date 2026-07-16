@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { obtenerReporteEvaluacion } from "../services/reporteService";
 import "../styles/reporte.css";
 import autoTable from "jspdf-autotable";
+import { Toast } from "../lib/toast";
 
 function ReporteEvaluacion() {
   const { id } = useParams();
@@ -20,7 +21,7 @@ function ReporteEvaluacion() {
     const { data, error } = await obtenerReporteEvaluacion(id);
 
     if (error) {
-      alert(error.message);
+      Toast.error(error.message);
       return;
     }
 

@@ -1091,3 +1091,18 @@ th {
 .table-card .actions button {
   white-space: nowrap;
 }
+
+.asignacion-card table th,
+.asignacion-card table td {
+  vertical-align: middle;
+}
+
+.asignacion-card table th:nth-child(2),
+.asignacion-card table td:nth-child(2) {
+  width: 180px;
+}
+
+.asignacion-card table th:nth-child(4),
+.asignacion-card table td:nth-child(4) {
+  width: 260px;
+}

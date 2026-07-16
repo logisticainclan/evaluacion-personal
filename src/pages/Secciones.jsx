@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Toast } from "../lib/toast";
 import {
   obtenerSecciones,
   crearSeccion,
@@ -26,7 +27,7 @@ function Secciones() {
     const { data, error } = await obtenerSecciones()
 
     if (error) {
-      alert(error.message)
+      Toast.error(error.message);
       return
     }
 
@@ -66,7 +67,7 @@ function Secciones() {
       : await crearSeccion(datos)
 
     if (respuesta.error) {
-      alert(respuesta.error.message)
+      Toast.error(respuesta.error.message);
       return
     }
 
@@ -82,7 +83,7 @@ function Secciones() {
     })
 
     if (error) {
-      alert(error.message)
+      Toast.error(error.message);
       return
     }
 
@@ -95,7 +96,7 @@ function Secciones() {
     const { error } = await eliminarSeccion(id)
 
     if (error) {
-      alert(error.message)
+      Toast.error(error.message);
       return
     }
 

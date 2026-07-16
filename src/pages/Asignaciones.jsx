@@ -37,12 +37,17 @@ function Asignaciones() {
     const a = await obtenerPersonalAsignadoPeriodo();
 
     if (e.error) {
-      alert(e.error.message);
+      Toast.error(e.error.message);
       return;
     }
 
     if (p.error) {
-      alert(p.error.message);
+      Toast.error(p.error.message);
+      return;
+    }
+
+    if (a.error) {
+      Toast.error(a.error.message);
       return;
     }
 
@@ -71,28 +76,28 @@ function Asignaciones() {
 
     if (r.error) {
 
-      alert(r.error.message);
+      Toast.error(r.error.message);
 
       return;
 
     }
 
     setSeleccionados(
-      r.data.map(x => x.personal_id)
+      (r.data || []).map((x) => x.personal_id)
     );
 
   }
 
   function cambiarSeleccion(idPersonal) {
   if (!evaluador) {
-    alert("Primero seleccione un evaluador");
+    Toast.error("Primero seleccione un evaluador");
     return;
   }
 
   const usuarioEvaluador = evaluadores.find(u => u.id === evaluador);
 
   if (usuarioEvaluador?.personal_id === idPersonal) {
-    alert("Un evaluador no puede evaluarse a sí mismo");
+    Toast.error("Un evaluador no puede evaluarse a sí mismo");
     return;
   }
 
@@ -251,13 +256,10 @@ const personalFiltrado = personal.filter((p) => {
           <thead>
 
             <tr>
-
               <th width="60"></th>
-
               <th>DNI</th>
-
               <th>Apellidos y Nombres</th>
-
+              <th>Área</th>
             </tr>
 
           </thead>
@@ -269,28 +271,24 @@ const personalFiltrado = personal.filter((p) => {
               personalFiltrado.map(p => (
 
                 <tr key={p.id}>
-
                   <td>
-
                     <input
-                        type="checkbox"
-                        checked={seleccionados.includes(p.id)}
-                        disabled={
-                            evaluadores.find(u => u.id === evaluador)?.personal_id === p.id
-                        }
-                        onChange={() => cambiarSeleccion(p.id)}
+                      type="checkbox"
+                      checked={seleccionados.includes(p.id)}
+                      disabled={
+                        evaluadores.find((u) => u.id === evaluador)?.personal_id === p.id
+                      }
+                      onChange={() => cambiarSeleccion(p.id)}
                     />
-
                   </td>
 
                   <td>{p.dni}</td>
 
                   <td>
-
                     {p.apellidos}, {p.nombres}
-
                   </td>
 
+                  <td>{p.area || "Sin área"}</td>
                 </tr>
 
               ))

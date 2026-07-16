@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { obtenerReporteGeneral } from "../services/reportesService";
 import { Card, StatCard, EmptyState } from "../components/ui";
+import { Toast } from "../lib/toast";
 
 function Reportes() {
   const [registros, setRegistros] = useState([]);
@@ -13,7 +14,7 @@ function Reportes() {
     const { data, error } = await obtenerReporteGeneral();
 
     if (error) {
-      alert(error.message);
+      Toast.error(error.message);
       return;
     }
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Toast } from "../lib/toast";
 import {
   obtenerNiveles,
   crearNivel,
@@ -27,7 +28,7 @@ function Niveles() {
     const { data, error } = await obtenerNiveles()
 
     if (error) {
-      alert(error.message)
+      Toast.error(error.message);
       return
     }
 
@@ -69,7 +70,7 @@ function Niveles() {
       : await crearNivel(datos)
 
     if (respuesta.error) {
-      alert(respuesta.error.message)
+      Toast.error(respuesta.error.message);
       return
     }
 
@@ -85,7 +86,7 @@ function Niveles() {
     })
 
     if (error) {
-      alert(error.message)
+      Toast.error(error.message);
       return
     }
 
@@ -98,7 +99,7 @@ function Niveles() {
     const { error } = await eliminarNivel(id)
 
     if (error) {
-      alert(error.message)
+      Toast.error(error.message);
       return
     }
 

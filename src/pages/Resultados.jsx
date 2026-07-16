@@ -3,6 +3,7 @@ import { obtenerResultados } from "../services/resultadosService";
 import { DataTable, EmptyState, SearchInput } from "../components/ui"
 import { useNavigate } from "react-router-dom";
 import { exportarResultadosExcel } from "../utils/exportarExcel";
+import { Toast } from "../lib/toast";
 
 function Resultados() {
   const [resultados, setResultados] = useState([]);
@@ -21,7 +22,7 @@ function Resultados() {
     const { data, error } = await obtenerResultados();
 
     if (error) {
-      alert(error.message);
+      Toast.error(error.message);
       return;
     }
 

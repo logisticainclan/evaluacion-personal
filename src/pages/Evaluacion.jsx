@@ -8,6 +8,7 @@ import ResumenEvaluacion from "../components/evaluacion/ResumenEvaluacion";
 import "../styles/evaluacion.css";
 import EvaluacionSidebar from "../components/evaluacion/EvaluacionSidebar";
 import { Toast } from "../lib/toast";
+import { Messages } from "../lib/messages";
 
 import {
   obtenerPersonalEvaluable,
@@ -50,11 +51,30 @@ function Evaluacion() {
     const ficha = await obtenerFicha();
     const periodoData = await obtenerPeriodoActivo();
 
-    if (personalData.error) return alert(personalData.error.message);
-    if (ficha.secciones.error) return alert(ficha.secciones.error.message);
-    if (ficha.items.error) return alert(ficha.items.error.message);
-    if (ficha.niveles.error) return alert(ficha.niveles.error.message);
-    if (periodoData.error) return alert("No hay periodo activo configurado");
+    if (personalData.error) {
+      Toast.error(personalData.error.message);
+      return;
+    }
+
+    if (ficha.secciones.error) {
+      Toast.error(ficha.secciones.error.message);
+      return;
+    }
+
+    if (ficha.items.error) {
+      Toast.error(ficha.items.error.message);
+      return;
+    }
+
+    if (ficha.niveles.error) {
+      Toast.error(ficha.niveles.error.message);
+      return;
+    }
+
+    if (periodoData.error) {
+      Toast.error("No hay período activo configurado");
+      return;
+    }
 
     setPersonal(personalData.data || []);
     setSecciones(ficha.secciones.data || []);
@@ -70,7 +90,7 @@ function Evaluacion() {
       const { data, error } = await obtenerEvaluacionPorId(id);
 
       if (error) {
-        alert(error.message);
+        Toast.error(error.message);
         return;
       }
 
@@ -103,7 +123,7 @@ function Evaluacion() {
     const usuario = JSON.parse(localStorage.getItem("usuario_app"));
 
     if (soloLectura) {
-      Toast.error("Esta evaluación ya fue finalizada");
+      Toast.error(Messages.evaluacionNoEditable);
       return;
     }
 
@@ -153,14 +173,29 @@ function Evaluacion() {
     setEvaluacionId(data.id);
     setEstado(data.estado);
 
-    Toast.success("Avance guardado correctamente");
+    Toast.success(Messages.evaluacionGuardada);
   };
 
   const finalizar = async () => {
     const usuario = JSON.parse(localStorage.getItem("usuario_app"));
 
+    if (!usuario?.id) {
+      Toast.error("No se encontró el usuario evaluador");
+      return;
+    }
+
+    if (!periodo?.id) {
+      Toast.error("No hay período activo");
+      return;
+    }
+
+    if (soloLectura) {
+      Toast.error(Messages.evaluacionNoEditable);
+      return;
+    }
+
     if (Object.keys(respuestas).length !== items.length) {
-      alert("Debe calificar todos los ítems antes de finalizar");
+      Toast.error("Debe calificar todos los ítems antes de finalizar");
       return;
     }
 
@@ -186,18 +221,18 @@ function Evaluacion() {
     setGuardando(false);
 
     if (error) {
-      alert(error.message);
+      Toast.error(error.message);
       return;
     }
 
     const { error: errorFinalizar } = await finalizarEvaluacion(data.id);
 
     if (errorFinalizar) {
-      alert(errorFinalizar.message);
+      Toast.error(errorFinalizar.message);
       return;
     }
 
-    Toast.success("Evaluación finalizada correctamente");
+    Toast.success(Messages.evaluacionFinalizada);
     navigate("/admin/evaluaciones");
   };
 

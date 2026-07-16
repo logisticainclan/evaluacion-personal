@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { obtenerPanelEvaluaciones } from "../services/evaluacionesService";
+import { Toast } from "../lib/toast";
 
 function Evaluaciones() {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ function Evaluaciones() {
     const { data, error } = await obtenerPanelEvaluaciones();
 
     if (error) {
-      alert(error.message);
+      Toast.error(error.message);
       return;
     }
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Toast } from "../lib/toast";
 import {
   obtenerUsuarios,
   obtenerPersonalSinUsuario,
@@ -28,8 +29,15 @@ function Usuarios() {
       obtenerPersonalSinUsuario()
     ])
 
-    if (resUsuarios.error) alert(resUsuarios.error.message)
-    if (resPersonal.error) alert(resPersonal.error.message)
+    if (resUsuarios.error) {
+      Toast.error(resUsuarios.error.message);
+      return;
+    }
+
+    if (resPersonal.error) {
+      Toast.error(resPersonal.error.message);
+      return;
+    }
 
     setUsuarios(resUsuarios.data || [])
     setPersonal(resPersonal.data || [])
@@ -39,19 +47,19 @@ function Usuarios() {
     e.preventDefault()
 
     if (!form.personal_id) {
-      alert('Seleccione un personal')
+      Toast.error("Seleccione un personal");
       return
     }
 
     if (form.password.length < 4) {
-      alert('La contraseña debe tener al menos 4 caracteres')
+      Toast.error("La contraseña debe tener al menos 4 caracteres");
       return
     }
 
     const { error } = await crearUsuario(form)
 
     if (error) {
-      alert(error.message)
+      Toast.error(error.message);
       return
     }
 
@@ -70,7 +78,7 @@ function Usuarios() {
     })
 
     if (error) {
-      alert(error.message)
+      Toast.error(error.message);
       return
     }
 
@@ -83,7 +91,7 @@ function Usuarios() {
     const { error } = await eliminarUsuario(id)
 
     if (error) {
-      alert(error.message)
+      Toast.error(error.message);
       return
     }
 

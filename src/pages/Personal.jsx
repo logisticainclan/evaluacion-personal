@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import PersonalTable from '../components/personal/PersonalTable'
 import PersonalModal from '../components/personal/PersonalModal'
+import { Toast } from "../lib/toast";
 import {
   obtenerPersonal,
   obtenerAreasActivas,
@@ -31,9 +32,20 @@ function Personal() {
       obtenerCargosActivos()
     ])
 
-    if (resPersonal.error) alert(resPersonal.error.message)
-    if (resAreas.error) alert(resAreas.error.message)
-    if (resCargos.error) alert(resCargos.error.message)
+    if (resPersonal.error) {
+      Toast.error(resPersonal.error.message);
+      return;
+    }
+
+    if (resAreas.error) {
+      Toast.error(resAreas.error.message);
+      return;
+    }
+
+    if (resCargos.error) {
+      Toast.error(resCargos.error.message);
+      return;
+    }
 
     setPersonal(resPersonal.data || [])
     setAreas(resAreas.data || [])
@@ -71,7 +83,7 @@ function Personal() {
       : await crearPersonal(datos)
 
     if (respuesta.error) {
-      alert(respuesta.error.message)
+      Toast.error(respuesta.error.message);
       return
     }
 
@@ -86,7 +98,7 @@ function Personal() {
     const { error } = await eliminarPersonal(id)
 
     if (error) {
-      alert(error.message)
+      Toast.error(error.message);
       return
     }
 

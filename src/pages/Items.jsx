@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Toast } from "../lib/toast";
 import {
   obtenerItems,
   obtenerSeccionesActivas,
@@ -33,8 +34,15 @@ function Items() {
       obtenerSeccionesActivas()
     ])
 
-    if (resItems.error) alert(resItems.error.message)
-    if (resSecciones.error) alert(resSecciones.error.message)
+    if (resItems.error) {
+      Toast.error(resItems.error.message);
+      return;
+    }
+
+    if (resSecciones.error) {
+      Toast.error(resSecciones.error.message);
+      return;
+    }
 
     setItems(resItems.data || [])
     setSecciones(resSecciones.data || [])
@@ -74,7 +82,7 @@ function Items() {
       : await crearItem(datos)
 
     if (respuesta.error) {
-      alert(respuesta.error.message)
+      Toast.error(respuesta.error.message);
       return
     }
 
@@ -90,7 +98,7 @@ function Items() {
     })
 
     if (error) {
-      alert(error.message)
+      Toast.error(error.message);
       return
     }
 
@@ -103,7 +111,7 @@ function Items() {
     const { error } = await eliminarItem(id)
 
     if (error) {
-      alert(error.message)
+      Toast.error(error.message);
       return
     }
 

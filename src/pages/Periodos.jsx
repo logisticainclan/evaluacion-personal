@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { StatCard, Card } from "../components/ui";
+import { StatCard, Card, Button } from "../components/ui";
 import { Toast } from "../lib/toast";
 import { Messages } from "../lib/messages";
-import { Button } from "../components/ui";
 import {
   obtenerPeriodos,
   crearAnioPeriodos,
@@ -39,7 +38,9 @@ function Periodos() {
 
     const r = await obtenerResumenPeriodoActivo();
 
-    if (!r.error) {
+    if (r.error) {
+      setResumen(null);
+    } else {
       setResumen(r.data);
     }
   };
@@ -110,6 +111,11 @@ function Periodos() {
 
 const guardarFechas = async (e) => {
   e.preventDefault();
+
+  if (!form.fecha_inicio || !form.fecha_fin) {
+    Toast.error("Debe ingresar la fecha de inicio y la fecha de fin.");
+    return;
+  }
 
   if (form.fecha_fin < form.fecha_inicio) {
     Toast.error("La fecha de fin debe ser mayor que la fecha de inicio.");
@@ -282,12 +288,9 @@ const periodoActivo = periodos.find((p) => p.estado === "activo");
                 </Button>
 
                 {p.estado === "pendiente" && (
-                  <button
-                    className="primary-btn"
-                    onClick={() => activar(p)}
-                  >
+                  <Button onClick={() => activar(p)}>
                     Activar
-                  </button>
+                  </Button>
                 )}
 
                 {p.estado === "activo" && (
@@ -346,13 +349,20 @@ const periodoActivo = periodos.find((p) => p.estado === "activo");
           />
 
           <div className="modal-actions">
-            <button type="button" onClick={() => setModal(false)}>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                setModal(false);
+                setPeriodoEditando(null);
+              }}
+            >
               Cancelar
-            </button>
+            </Button>
 
-            <button className="primary-btn" type="submit">
+            <Button type="submit">
               Guardar
-            </button>
+            </Button>
           </div>
         </form>
       </div>
