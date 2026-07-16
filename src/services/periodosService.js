@@ -20,15 +20,25 @@ export async function crearAnioPeriodos(anio) {
 }
 
 export async function activarPeriodo(id) {
-  await supabase
+  const { error: errorCerrar } = await supabase
     .from("periodos")
     .update({ estado: "cerrado" })
-    .eq("estado", "activo");
+    .eq("estado", "activo")
+    .neq("id", id);
+
+  if (errorCerrar) {
+    return {
+      data: null,
+      error: errorCerrar
+    };
+  }
 
   return await supabase
     .from("periodos")
     .update({ estado: "activo" })
-    .eq("id", id);
+    .eq("id", id)
+    .select()
+    .single();
 }
 
 export async function cerrarPeriodo(id) {
@@ -43,4 +53,81 @@ export async function actualizarFechasPeriodo(id, data) {
     .from("periodos")
     .update(data)
     .eq("id", id);
+}
+
+export async function obtenerResumenPeriodoActivo() {
+
+  const { data: periodo, error } = await supabase
+    .from("periodos")
+    .select("id,anio,nombre")
+    .eq("estado", "activo")
+    .single();
+
+  if (error) {
+    return { data: null, error };
+  }
+
+  const [
+    asignaciones,
+    evaluaciones
+  ] = await Promise.all([
+
+    supabase
+      .from("evaluador_personal")
+      .select("evaluador_id,personal_id")
+      .eq("periodo_id", periodo.id),
+
+    supabase
+      .from("evaluaciones")
+      .select("estado")
+      .eq("periodo_id", periodo.id)
+
+  ]);
+
+  if (asignaciones.error) {
+    return { data: null, error: asignaciones.error };
+  }
+
+  if (evaluaciones.error) {
+    return { data: null, error: evaluaciones.error };
+  }
+
+  const totalAsignados = asignaciones.data.length;
+
+  const evaluadores =
+    new Set(
+      asignaciones.data.map(a => a.evaluador_id)
+    ).size;
+
+  const finalizadas =
+    evaluaciones.data.filter(
+      e => e.estado === "finalizada"
+    ).length;
+
+  const proceso =
+    evaluaciones.data.filter(
+      e => e.estado === "proceso"
+    ).length;
+
+  const pendientes =
+    totalAsignados - finalizadas - proceso;
+
+  const avance =
+    totalAsignados
+      ? Math.round((finalizadas / totalAsignados) * 100)
+      : 0;
+
+  return {
+    data: {
+      periodo,
+      evaluadores,
+      totalAsignados,
+      finalizadas,
+      proceso,
+      pendientes,
+      avance
+    },
+    error: null
+  };
+
 }

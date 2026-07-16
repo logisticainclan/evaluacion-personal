@@ -60,10 +60,6 @@ function Reportes() {
           <h1>Reportes</h1>
           <p>Análisis general de evaluaciones finalizadas</p>
         </div>
-
-        <button className="primary-btn">
-          Exportar Excel
-        </button>
       </div>
 
       <div className="stats-grid">

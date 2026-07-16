@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { Toast } from "../lib/toast";
+import { Messages } from "../lib/messages";
 
 import {
   obtenerEvaluadores,
@@ -102,13 +104,9 @@ function Asignaciones() {
 }
 
   async function guardar() {
-
     if (!evaluador) {
-
-      alert("Seleccione un evaluador");
-
+      Toast.error("Seleccione un evaluador");
       return;
-
     }
 
     const r = await guardarAsignaciones(
@@ -117,15 +115,22 @@ function Asignaciones() {
     );
 
     if (r?.error) {
-
-      alert(r.error.message);
-
+      Toast.error(r.error.message);
       return;
-
     }
 
-    alert("Asignaciones guardadas correctamente.");
+    const asignadosPeriodo = await obtenerPersonalAsignadoPeriodo();
 
+    if (asignadosPeriodo.error) {
+      Toast.error(asignadosPeriodo.error.message);
+      return;
+    }
+
+    setPersonalAsignado(
+      (asignadosPeriodo.data || []).map((x) => x.personal_id)
+    );
+
+    Toast.success(Messages.asignacionesGuardadas);
   }
 
   const areasUnicas = [

@@ -39,13 +39,12 @@ function Sidebar() {
           Evaluaciones
         </NavLink>
 
-        <NavLink to="/admin/reportes">
-          <BarChart3 size={20} />
-          Reportes
-        </NavLink>
-
         {esAdmin && (
           <>
+            <NavLink to="/admin/reportes">
+              <BarChart3 size={20} />
+              Reportes
+            </NavLink>
             <hr className="sidebar-divider" />
 
             <NavLink to="/admin/personal">

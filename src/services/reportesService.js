@@ -16,6 +16,12 @@ export async function obtenerReporteGeneral() {
         area,
         cargo
       ),
+      evaluador:usuarios_app!evaluaciones_evaluador_id_fkey (
+        personal (
+          nombres,
+          apellidos
+        )
+      ),
       periodos (
         anio,
         nombre

@@ -1,19 +1,24 @@
 import { useEffect, useState } from "react";
-
+import { StatCard, Card } from "../components/ui";
+import { Toast } from "../lib/toast";
+import { Messages } from "../lib/messages";
+import { Button } from "../components/ui";
 import {
   obtenerPeriodos,
   crearAnioPeriodos,
   activarPeriodo,
   cerrarPeriodo,
-  actualizarFechasPeriodo
+  actualizarFechasPeriodo,
+  obtenerResumenPeriodoActivo
 } from "../services/periodosService";
 
 function Periodos() {
   const [periodos, setPeriodos] = useState([]);
+  const [resumen, setResumen] = useState(null);
   const [anio, setAnio] = useState(new Date().getFullYear());
   const [modal, setModal] = useState(false);
-const [periodoEditando, setPeriodoEditando] = useState(null);
-const [form, setForm] = useState({
+  const [periodoEditando, setPeriodoEditando] = useState(null);
+  const [form, setForm] = useState({
   fecha_inicio: "",
   fecha_fin: ""
 });
@@ -26,52 +31,59 @@ const [form, setForm] = useState({
     const { data, error } = await obtenerPeriodos();
 
     if (error) {
-      alert(error.message);
+      Toast.error(error.message);
       return;
     }
 
     setPeriodos(data || []);
+
+    const r = await obtenerResumenPeriodoActivo();
+
+    if (!r.error) {
+      setResumen(r.data);
+    }
   };
 
   const crearAnio = async () => {
     const existeAnio = periodos.some((p) => p.anio === Number(anio));
 
     if (existeAnio) {
-    alert(`El año ${anio} ya existe`);
-    return;
+      Toast.error(`El año ${anio} ya existe.`);
+      return;
     }
     const { error } = await crearAnioPeriodos(Number(anio));
 
     if (error) {
-      alert(error.message);
+      Toast.error(error.message);
       return;
     }
 
-    alert("Año escolar creado correctamente");
+    Toast.success(Messages.anioCreado);
     cargar();
   };
 
   const activar = async (periodo) => {
-  if (!periodo.fecha_inicio || !periodo.fecha_fin) {
-    alert("Debe configurar las fechas antes de activar el período");
-    return;
-  }
+    if (!periodo.fecha_inicio || !periodo.fecha_fin) {
+      Toast.error("Debe configurar las fechas antes de activar el período.");
+      return;
+    }
 
-  const confirmar = confirm(
-    `Se cerrará el período activo y se activará ${periodo.anio} - ${periodo.nombre}. ¿Deseas continuar?`
-  );
+    const confirmar = confirm(
+      `Se cerrará el período activo y se activará ${periodo.anio} - ${periodo.nombre}. ¿Deseas continuar?`
+    );
 
-  if (!confirmar) return;
+    if (!confirmar) return;
 
-  const { error } = await activarPeriodo(periodo.id);
+    const { error } = await activarPeriodo(periodo.id);
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
+    if (error) {
+      Toast.error(error.message);
+      return;
+    }
 
-  cargar();
-};
+    Toast.success(Messages.periodoActivado);
+    cargar();
+  };
 
   const cerrar = async (id) => {
     if (!confirm("¿Deseas cerrar este período?")) return;
@@ -79,10 +91,11 @@ const [form, setForm] = useState({
     const { error } = await cerrarPeriodo(id);
 
     if (error) {
-      alert(error.message);
+      Toast.error(error.message);
       return;
     }
 
+    Toast.success(Messages.periodoCerrado);
     cargar();
   };
 
@@ -99,19 +112,24 @@ const guardarFechas = async (e) => {
   e.preventDefault();
 
   if (form.fecha_fin < form.fecha_inicio) {
-    alert("La fecha de fin debe ser mayor que la fecha de inicio");
+    Toast.error("La fecha de fin debe ser mayor que la fecha de inicio.");
     return;
   }
 
-  const { error } = await actualizarFechasPeriodo(periodoEditando.id, form);
+  const { error } = await actualizarFechasPeriodo(
+    periodoEditando.id,
+    form
+  );
 
   if (error) {
-    alert(error.message);
+    Toast.error(error.message);
     return;
   }
 
   setModal(false);
   setPeriodoEditando(null);
+
+  Toast.success(Messages.fechasActualizadas);
   cargar();
 };
 
@@ -128,23 +146,87 @@ const periodoActivo = periodos.find((p) => p.estado === "activo");
   <div>
     <div className="page-header">
       <div>
-        {periodoActivo && (
-  <div className="periodo-activo-card">
-    <div>
-      <span>Período activo</span>
-      <h2>{periodoActivo.anio} - {periodoActivo.nombre}</h2>
-      <p>
-        {formatearFecha(periodoActivo.fecha_inicio)} — {formatearFecha(periodoActivo.fecha_fin)}
-      </p>
-    </div>
-
-    <strong>Activo</strong>
-  </div>
-)}
         <h1>Períodos de Evaluación</h1>
-        <p>Gestión de bimestres activos y cerrados</p>
+        <p>Gestión de bimestres activos, pendientes y cerrados</p>
       </div>
     </div>
+
+    {periodoActivo ? (
+      <div className="periodo-activo-card">
+        <div>
+          <span>Período activo</span>
+
+          <h2>
+            {periodoActivo.anio} - {periodoActivo.nombre}
+          </h2>
+
+          <p>
+            {formatearFecha(periodoActivo.fecha_inicio)}
+            {" — "}
+            {formatearFecha(periodoActivo.fecha_fin)}
+          </p>
+        </div>
+
+        <strong>Activo</strong>
+      </div>
+    ) : (
+      <div className="periodo-sin-activo">
+        <strong>No existe un período activo</strong>
+        <p>Active un bimestre para habilitar asignaciones y evaluaciones.</p>
+      </div>
+    )}
+
+    {resumen && (
+      <div className="stats-grid">
+
+        <StatCard
+          title="Evaluadores"
+          value={resumen.evaluadores}
+        />
+
+        <StatCard
+          title="Asignados"
+          value={resumen.totalAsignados}
+        />
+
+        <StatCard
+          title="Finalizadas"
+          value={resumen.finalizadas}
+        />
+
+        <StatCard
+          title="Pendientes"
+          value={resumen.pendientes}
+        />
+
+      </div>
+    )}
+
+    {resumen && (
+      <Card className="dashboard-card">
+
+        <div className="progress-header">
+          <strong>Avance del período</strong>
+          <span>{resumen.avance}%</span>
+        </div>
+
+        <div className="progress-track">
+          <div
+            className="progress-fill"
+            style={{
+              width: `${resumen.avance}%`
+            }}
+          />
+        </div>
+
+        <p>
+          {resumen.finalizadas} de{" "}
+          {resumen.totalAsignados}
+          {" "}evaluaciones finalizadas.
+        </p>
+
+      </Card>
+    )}
 
     <div className="periodos-toolbar">
   <div>
@@ -159,9 +241,9 @@ const periodoActivo = periodos.find((p) => p.estado === "activo");
       onChange={(e) => setAnio(e.target.value)}
     />
 
-    <button className="primary-btn" onClick={crearAnio}>
-      Crear año
-    </button>
+    <Button onClick={crearAnio}>
+        Crear año
+    </Button>
   </div>
 </div>
 
@@ -186,33 +268,41 @@ const periodoActivo = periodos.find((p) => p.estado === "activo");
               <td>{formatearFecha(p.fecha_inicio)}</td>
               <td>{formatearFecha(p.fecha_fin)}</td>
               <td>
-                <span className={`status ${p.estado === "activo" ? "activo" : "inactivo"}`}>
+                <span className={`periodo-status ${p.estado}`}>
                   {p.estado}
                 </span>
               </td>
               <td>
                 <div className="periodos-actions">
-                <button
-                    className="secondary-btn"
+                <Button
+                    variant="secondary"
                     onClick={() => abrirEditar(p)}
                 >
                     Editar
-                </button>
+                </Button>
 
-                {p.estado !== "activo" ? (
-                    <button
+                {p.estado === "pendiente" && (
+                  <button
                     className="primary-btn"
                     onClick={() => activar(p)}
-                    >
+                  >
                     Activar
-                    </button>
-                ) : (
-                    <button
-                    className="danger-btn"
+                  </button>
+                )}
+
+                {p.estado === "activo" && (
+                  <Button
+                      variant="danger"
                     onClick={() => cerrar(p.id)}
-                    >
+                  >
                     Cerrar
-                    </button>
+                  </Button>
+                )}
+
+                {p.estado === "cerrado" && (
+                  <span className="periodo-bloqueado">
+                    Período cerrado
+                  </span>
                 )}
                 </div>
               </td>

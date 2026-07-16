@@ -14,7 +14,8 @@ export async function obtenerDashboardEvaluador() {
   const { data: asignados, error: errorAsignados } = await supabase
     .from("evaluador_personal")
     .select("personal_id")
-    .eq("evaluador_id", usuario.id);
+    .eq("evaluador_id", usuario.id)
+    .eq("periodo_id", periodo.data.id);
 
   if (errorAsignados) return { data: null, error: errorAsignados };
 
