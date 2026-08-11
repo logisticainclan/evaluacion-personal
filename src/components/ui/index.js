@@ -6,3 +6,4 @@ export { default as SearchInput } from "./SearchInput";
 export { default as StatCard } from "./StatCard";
 export { default as StatusBadge } from "./StatusBadge";
 export { default as Button } from "./Button";
+export { default as ConfirmModal } from "./ConfirmModal";

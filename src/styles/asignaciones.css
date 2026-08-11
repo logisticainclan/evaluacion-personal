@@ -1,0 +1,247 @@
+.asignaciones-page {
+  display: grid;
+  gap: 22px;
+}
+
+.asignaciones-header {
+  margin-bottom: 0;
+}
+
+.asignaciones-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.asignacion-stat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 100px;
+  padding: 18px;
+  border: 1px solid #e5e9ef;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.asignacion-stat-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 13px;
+  color: #1e40af;
+  background: #e8efff;
+}
+
+.asignacion-stat span {
+  display: block;
+  margin-bottom: 5px;
+  color: #7b8794;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.asignacion-stat strong {
+  color: #172033;
+  font-size: 26px;
+}
+
+.asignaciones-panel {
+  padding: 22px;
+  border: 1px solid #e5e9ef;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.055);
+}
+
+.asignaciones-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.asignaciones-panel-header h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 17px;
+}
+
+.asignaciones-panel-header p {
+  margin: 5px 0 0;
+  color: #7b8794;
+  font-size: 11px;
+}
+
+.asignaciones-field label {
+  display: block;
+  margin-bottom: 7px;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.asignaciones-field select {
+  width: 100%;
+  height: 46px;
+  padding: 0 13px;
+  border: 1px solid #d7dde5;
+  border-radius: 11px;
+  outline: none;
+  background: #fbfcfd;
+  color: #26344a;
+}
+
+.asignaciones-field select:focus {
+  border-color: #34805a;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(52, 128, 90, 0.1);
+}
+
+.asignaciones-filters {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) minmax(180px, 1fr) auto;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.asignaciones-search {
+  position: relative;
+}
+
+.asignaciones-search svg {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  color: #98a2b3;
+  pointer-events: none;
+}
+
+.asignaciones-search input {
+  padding-left: 42px;
+}
+
+.asignaciones-filter-control {
+  width: 100%;
+  height: 46px;
+  margin: 0;
+  padding: 0 13px;
+  border: 1px solid #d7dde5;
+  border-radius: 11px;
+  outline: none;
+  background: #fbfcfd;
+}
+
+.asignaciones-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+  color: #7b8794;
+  font-size: 11px;
+}
+
+.asignaciones-summary strong {
+  color: #344054;
+}
+
+.asignaciones-table-card {
+  overflow: hidden;
+  border: 1px solid #e5e9ef;
+  border-radius: 16px;
+}
+
+.asignaciones-table-scroll {
+  overflow-x: auto;
+}
+
+.asignaciones-table {
+  min-width: 820px;
+}
+
+.asignaciones-table th {
+  padding: 13px 15px;
+  background: #f7f9fc;
+  color: #667085;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.asignaciones-table td {
+  padding: 14px 15px;
+  vertical-align: middle;
+}
+
+.asignacion-person {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.asignacion-avatar {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 11px;
+  background: #e8f6ed;
+  color: #166534;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.asignacion-person strong {
+  display: block;
+  color: #26344a;
+  font-size: 12px;
+}
+
+.asignacion-person span {
+  display: block;
+  margin-top: 3px;
+  color: #98a2b3;
+  font-size: 10px;
+}
+
+.asignacion-checkbox {
+  width: 17px;
+  height: 17px;
+  accent-color: #1e40af;
+  cursor: pointer;
+}
+
+.asignacion-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.asignacion-row-selected {
+  background: #f7faff;
+}
+
+.asignaciones-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+@media (max-width: 900px) {
+  .asignaciones-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .asignaciones-filters {
+    grid-template-columns: 1fr;
+  }
+}

@@ -9,6 +9,7 @@ import "../styles/evaluacion.css";
 import EvaluacionSidebar from "../components/evaluacion/EvaluacionSidebar";
 import { Toast } from "../lib/toast";
 import { Messages } from "../lib/messages";
+import { ConfirmModal } from "../components/ui";
 
 import {
   obtenerPersonalEvaluable,
@@ -29,6 +30,7 @@ function Evaluacion() {
   const [items, setItems] = useState([]);
   const [niveles, setNiveles] = useState([]);
   const [periodo, setPeriodo] = useState(null);
+  const [periodoCerrado, setPeriodoCerrado] = useState(false);
 
   const [evaluacionId, setEvaluacionId] = useState(id || null);
   const [estado, setEstado] = useState("proceso");
@@ -38,23 +40,121 @@ function Evaluacion() {
   const [observacion, setObservacion] = useState("");
   const [guardando, setGuardando] = useState(false);
 
-  const soloLectura = estado === "finalizada";
+  const soloLectura = estado === "finalizada" || periodoCerrado;
 
   const [seccionActiva, setSeccionActiva] = useState(null);
+  const [confirmarFinalizacion, setConfirmarFinalizacion] = useState(false);
 
   useEffect(() => {
     cargarFicha();
   }, []);
 
   const cargarFicha = async () => {
-    const personalData = await obtenerPersonalEvaluable();
-    const ficha = await obtenerFicha();
-    const periodoData = await obtenerPeriodoActivo();
+    /*
+     * =====================================================
+     * EVALUACIÓN EXISTENTE
+     * =====================================================
+     */
+    if (id) {
+      const { data, error } = await obtenerEvaluacionPorId(id);
 
-    if (personalData.error) {
-      Toast.error(personalData.error.message);
+      if (error) {
+        Toast.error(error.message);
+        navigate("/admin/evaluaciones", { replace: true });
+        return;
+      }
+
+      setEvaluacionId(data.id);
+      setPersonalSeleccionado(data.personal_id);
+      setObservacion(data.observacion || "");
+      setEstado(data.estado);
+
+      setPeriodo(data.periodos || null);
+
+      const cerrado = data.periodos?.estado !== "activo";
+      setPeriodoCerrado(cerrado);
+
+      if (data.personal) {
+        setPersonal([data.personal]);
+      }
+
+      /*
+       * Utilizamos la fotografía histórica de la ficha.
+       */
+      if (data.ficha_snapshot) {
+        const snapshot = data.ficha_snapshot;
+
+        const seccionesSnapshot = [...(snapshot.secciones || [])].sort(
+          (a, b) => Number(a.orden || 0) - Number(b.orden || 0),
+        );
+
+        const itemsSnapshot = [...(snapshot.items || [])].sort(
+          (a, b) => Number(a.orden || 0) - Number(b.orden || 0),
+        );
+
+        const nivelesSnapshot = [...(snapshot.niveles || [])].sort(
+          (a, b) => Number(a.orden || 0) - Number(b.orden || 0),
+        );
+
+        setSecciones(seccionesSnapshot);
+        setItems(itemsSnapshot);
+        setNiveles(nivelesSnapshot);
+
+        if (seccionesSnapshot.length > 0) {
+          setSeccionActiva(seccionesSnapshot[0].id);
+        }
+      } else {
+        /*
+         * Fallback por seguridad para registros antiguos
+         * que todavía no tengan snapshot.
+         */
+        const ficha = await obtenerFicha();
+
+        if (ficha.secciones.error) {
+          Toast.error(ficha.secciones.error.message);
+          return;
+        }
+
+        if (ficha.items.error) {
+          Toast.error(ficha.items.error.message);
+          return;
+        }
+
+        if (ficha.niveles.error) {
+          Toast.error(ficha.niveles.error.message);
+          return;
+        }
+
+        setSecciones(ficha.secciones.data || []);
+        setItems(ficha.items.data || []);
+        setNiveles(ficha.niveles.data || []);
+
+        if ((ficha.secciones.data || []).length > 0) {
+          setSeccionActiva(ficha.secciones.data[0].id);
+        }
+      }
+
+      const respuestasCargadas = {};
+
+      (data.evaluacion_detalle || []).forEach((d) => {
+        respuestasCargadas[d.item_id] = {
+          nivel_id: d.nivel_id,
+          puntaje: d.puntaje,
+        };
+      });
+
+      setRespuestas(respuestasCargadas);
+
       return;
     }
+
+    /*
+     * =====================================================
+     * NUEVA EVALUACIÓN
+     * =====================================================
+     */
+
+    const ficha = await obtenerFicha();
 
     if (ficha.secciones.error) {
       Toast.error(ficha.secciones.error.message);
@@ -71,50 +171,49 @@ function Evaluacion() {
       return;
     }
 
-    if (periodoData.error) {
-      Toast.error("No hay período activo configurado");
+    const personalData = await obtenerPersonalEvaluable();
+    const periodoData = await obtenerPeriodoActivo();
+
+    if (personalData.error) {
+      Toast.error(personalData.error.message);
+      navigate("/admin/evaluaciones", { replace: true });
       return;
     }
 
-    setPersonal(personalData.data || []);
+    if (periodoData.error || !periodoData.data?.id) {
+      Toast.error("No hay período activo configurado");
+      navigate("/admin/evaluaciones", { replace: true });
+      return;
+    }
+
     setSecciones(ficha.secciones.data || []);
     setItems(ficha.items.data || []);
     setNiveles(ficha.niveles.data || []);
-    setPeriodo(periodoData.data);
 
     if ((ficha.secciones.data || []).length > 0) {
       setSeccionActiva(ficha.secciones.data[0].id);
     }
 
-    if (id) {
-      const { data, error } = await obtenerEvaluacionPorId(id);
-
-      if (error) {
-        Toast.error(error.message);
-        return;
-      }
-
-      setEvaluacionId(data.id);
-      setPersonalSeleccionado(data.personal_id);
-      setObservacion(data.observacion || "");
-      setEstado(data.estado);
-
-      const respuestasCargadas = {};
-
-      data.evaluacion_detalle.forEach((d) => {
-        respuestasCargadas[d.item_id] = {
-          nivel_id: d.nivel_id,
-          puntaje: d.puntaje,
-        };
-      });
-
-      setRespuestas(respuestasCargadas);
-      return;
-    }
+    setPersonal(personalData.data || []);
+    setPeriodo(periodoData.data);
+    setPeriodoCerrado(false);
 
     const personalParam = searchParams.get("personal");
 
     if (personalParam) {
+      const existeAsignado = (personalData.data || []).some(
+        (p) => String(p.id) === String(personalParam),
+      );
+
+      if (!existeAsignado) {
+        Toast.error(
+          "Este personal no está asignado a tu usuario para el período actual.",
+        );
+
+        navigate("/admin/evaluaciones", { replace: true });
+        return;
+      }
+
       setPersonalSeleccionado(personalParam);
     }
   };
@@ -176,7 +275,7 @@ function Evaluacion() {
     Toast.success(Messages.evaluacionGuardada);
   };
 
-  const finalizar = async () => {
+  const ejecutarFinalizacion = async () => {
     const usuario = JSON.parse(localStorage.getItem("usuario_app"));
 
     if (!usuario?.id) {
@@ -194,19 +293,6 @@ function Evaluacion() {
       return;
     }
 
-    if (Object.keys(respuestas).length !== items.length) {
-      Toast.error("Debe calificar todos los ítems antes de finalizar");
-      return;
-    }
-
-    if (
-      !confirm(
-        "¿Seguro que deseas finalizar la evaluación? Ya no podrá modificarse.",
-      )
-    ) {
-      return;
-    }
-
     setGuardando(true);
 
     const { data, error } = await guardarEvaluacionCompleta({
@@ -218,14 +304,15 @@ function Evaluacion() {
       respuestas,
     });
 
-    setGuardando(false);
-
     if (error) {
+      setGuardando(false);
       Toast.error(error.message);
       return;
     }
 
     const { error: errorFinalizar } = await finalizarEvaluacion(data.id);
+
+    setGuardando(false);
 
     if (errorFinalizar) {
       Toast.error(errorFinalizar.message);
@@ -234,6 +321,20 @@ function Evaluacion() {
 
     Toast.success(Messages.evaluacionFinalizada);
     navigate("/admin/evaluaciones");
+  };
+
+  const solicitarFinalizacion = () => {
+    if (soloLectura) {
+      Toast.error(Messages.evaluacionNoEditable);
+      return;
+    }
+
+    if (Object.keys(respuestas).length !== items.length) {
+      Toast.error("Debe calificar todos los ítems antes de finalizar");
+      return;
+    }
+
+    setConfirmarFinalizacion(true);
   };
 
   const personalSeleccionadoInfo = personal.find(
@@ -273,7 +374,7 @@ function Evaluacion() {
         guardando={guardando}
         soloLectura={soloLectura}
         onGuardar={guardar}
-        onFinalizar={finalizar}
+        onFinalizar={solicitarFinalizacion}
       />
 
       <div className="evaluacion-body">
@@ -347,6 +448,19 @@ function Evaluacion() {
           />
         </div>
       </div>
+
+      <ConfirmModal
+        open={confirmarFinalizacion}
+        title="Finalizar evaluación"
+        message="¿Seguro que deseas finalizar la evaluación? Después ya no podrá modificarse."
+        confirmText="Finalizar"
+        variant="danger"
+        onCancel={() => setConfirmarFinalizacion(false)}
+        onConfirm={async () => {
+          setConfirmarFinalizacion(false);
+          await ejecutarFinalizacion();
+        }}
+      />
     </div>
   );
 }

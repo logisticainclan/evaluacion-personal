@@ -79,7 +79,7 @@ export async function obtenerResumenPeriodoActivo() {
 
     supabase
       .from("evaluaciones")
-      .select("estado")
+      .select("estado, personal_id")
       .eq("periodo_id", periodo.id)
 
   ]);
@@ -92,30 +92,39 @@ export async function obtenerResumenPeriodoActivo() {
     return { data: null, error: evaluaciones.error };
   }
 
-  const totalAsignados = asignaciones.data.length;
+  const totalAsignados = (asignaciones.data || []).length;
 
-  const evaluadores =
-    new Set(
-      asignaciones.data.map(a => a.evaluador_id)
-    ).size;
+  const evaluadores = new Set(
+    (asignaciones.data || []).map((a) => a.evaluador_id)
+  ).size;
 
-  const finalizadas =
-    evaluaciones.data.filter(
-      e => e.estado === "finalizada"
-    ).length;
+  const personalAsignadoIds = new Set(
+    (asignaciones.data || []).map((a) => a.personal_id)
+  );
 
-  const proceso =
-    evaluaciones.data.filter(
-      e => e.estado === "proceso"
-    ).length;
+  const evaluacionesAsignadas = (evaluaciones.data || []).filter((e) =>
+    personalAsignadoIds.has(e.personal_id)
+  );
 
-  const pendientes =
-    totalAsignados - finalizadas - proceso;
+  const finalizadas = evaluacionesAsignadas.filter(
+    (e) => e.estado === "finalizada"
+  ).length;
 
-  const avance =
-    totalAsignados
-      ? Math.round((finalizadas / totalAsignados) * 100)
-      : 0;
+  const proceso = evaluacionesAsignadas.filter(
+    (e) => e.estado === "proceso"
+  ).length;
+
+  const pendientes = Math.max(
+    totalAsignados - finalizadas - proceso,
+    0
+  );
+
+  const avance = totalAsignados
+    ? Math.min(
+        Math.round((finalizadas / totalAsignados) * 100),
+        100
+      )
+    : 0;
 
   return {
     data: {

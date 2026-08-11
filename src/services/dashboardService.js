@@ -48,6 +48,20 @@ export async function obtenerDashboardEvaluador() {
 export async function obtenerDashboardAdmin() {
   const periodo = await obtenerPeriodoActivo();
 
+  const { data: asignaciones, error: errorAsignaciones } = await supabase
+    .from("evaluador_personal")
+    .select("personal_id")
+    .eq("periodo_id", periodo.data.id);
+
+  if (errorAsignaciones) {
+    return {
+      data: null,
+      error: errorAsignaciones,
+    };
+  }
+
+const totalAsignados = asignaciones?.length || 0;
+
   const { count: totalPersonal } = await supabase
     .from("personal")
     .select("*", { count: "exact", head: true });
@@ -119,10 +133,14 @@ export async function obtenerDashboardAdmin() {
       periodo: periodo.data,
       totalPersonal,
       totalUsuarios,
+      totalAsignados,
       totalEvaluaciones,
       finalizadas,
       proceso,
-      pendientes: Math.max(totalPersonal - finalizadas - proceso, 0),
+      pendientes: Math.max(
+  totalAsignados - finalizadas - proceso,
+  0
+),
       promedioInstitucional,
       ultimas,
       ranking,

@@ -1,0 +1,140 @@
+.autocomplete {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete > input {
+  width: 100%;
+  height: 46px;
+  margin: 0;
+  padding: 0 48px 0 13px;
+  border: 1px solid #d7dde5;
+  border-radius: 11px;
+  outline: none;
+  background: #fbfcfd;
+  color: #26344a;
+  font-size: 13px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.autocomplete > input:focus {
+  border-color: #34805a;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(52, 128, 90, 0.1);
+}
+
+.autocomplete > input:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.autocomplete-toggle {
+  all: unset;
+  position: absolute;
+  top: 50%;
+  right: 7px;
+  z-index: 3;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+  border-radius: 9px;
+  color: #667085;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.autocomplete-toggle:hover:not(:disabled) {
+  color: #166534;
+  background: #edf7f1;
+}
+
+.autocomplete-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.autocomplete-menu {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid #dce2e8;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, 0.16);
+}
+
+.autocomplete-option {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: #344054;
+  text-align: left;
+  cursor: pointer;
+}
+
+.autocomplete-option:hover,
+.autocomplete-option-active {
+  color: #166534;
+  background: #edf7f1;
+}
+
+.autocomplete-option > svg {
+  flex-shrink: 0;
+  color: #15803d;
+}
+
+.autocomplete-option-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.autocomplete-option-text > span {
+  color: #344054;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.autocomplete-option-text small {
+  color: #98a2b3;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.autocomplete-empty {
+  display: grid;
+  gap: 4px;
+  padding: 12px 10px;
+}
+
+.autocomplete-empty strong {
+  color: #475467;
+  font-size: 12px;
+}
+
+.autocomplete-empty span {
+  color: #98a2b3;
+  font-size: 11px;
+  line-height: 1.45;
+}

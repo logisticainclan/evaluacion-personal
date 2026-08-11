@@ -4,20 +4,75 @@ import Dashboard from "../pages/Dashboard";
 import Layout from "../components/layout/Layout";
 import Personal from "../pages/Personal";
 import Usuarios from "../pages/Usuarios";
-import Secciones from "../pages/Secciones";
-import Niveles from "../pages/Niveles";
-import Items from "../pages/Items";
 import Asignaciones from "../pages/Asignaciones";
 import Evaluaciones from "../pages/Evaluaciones";
 import Evaluacion from "../pages/Evaluacion";
 import Periodos from "../pages/Periodos";
-import { obtenerUsuarioActual } from "../lib/auth";
+import {
+  obtenerUsuarioActual,
+  validarUsuarioActual,
+} from "../lib/auth";
 import Resultados from "../pages/Resultados";
 import ReporteEvaluacion from "../pages/ReporteEvaluacion";
 import Reportes from "../pages/Reportes";
+import CambiarPassword from "../pages/CambiarPassword";
+import FichaEvaluacion from "../pages/FichaEvaluacion";
+import { useEffect, useState } from "react";
 
 function RutaProtegida({ children, roles }) {
-  const usuario = obtenerUsuarioActual();
+  const usuarioLocal = obtenerUsuarioActual();
+
+  const [validando, setValidando] = useState(true);
+  const [usuario, setUsuario] = useState(usuarioLocal);
+
+  useEffect(() => {
+    let activo = true;
+
+    const validar = async () => {
+      if (!usuarioLocal) {
+        if (activo) {
+          setUsuario(null);
+          setValidando(false);
+        }
+
+        return;
+      }
+
+      const resultado = await validarUsuarioActual();
+
+      if (!activo) return;
+
+      if (!resultado.valido) {
+        setUsuario(null);
+        setValidando(false);
+        return;
+      }
+
+      setUsuario(resultado.usuario);
+      setValidando(false);
+    };
+
+    validar();
+
+    return () => {
+      activo = false;
+    };
+  }, []);
+
+  if (validando) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        Validando sesión...
+      </div>
+    );
+  }
 
   if (!usuario) {
     return <Navigate to="/login" replace />;
@@ -45,6 +100,7 @@ function AppRouter() {
             </RutaProtegida>
           }
         >
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
 
           <Route
@@ -84,30 +140,27 @@ function AppRouter() {
           />
 
           <Route
-            path="secciones"
+            path="ficha-evaluacion"
             element={
               <RutaProtegida roles={["admin"]}>
-                <Secciones />
+                <FichaEvaluacion />
               </RutaProtegida>
             }
+          />
+
+          <Route
+            path="secciones"
+            element={<Navigate to="/admin/ficha-evaluacion" replace />}
           />
 
           <Route
             path="niveles"
-            element={
-              <RutaProtegida roles={["admin"]}>
-                <Niveles />
-              </RutaProtegida>
-            }
+            element={<Navigate to="/admin/ficha-evaluacion" replace />}
           />
 
           <Route
             path="items"
-            element={
-              <RutaProtegida roles={["admin"]}>
-                <Items />
-              </RutaProtegida>
-            }
+            element={<Navigate to="/admin/ficha-evaluacion" replace />}
           />
 
           <Route
@@ -138,19 +191,19 @@ function AppRouter() {
           />
 
           <Route
-            path="resultados"
+            path="evaluaciones/:id/reporte"
             element={
-              <RutaProtegida roles={["admin"]}>
-                <Resultados />
+              <RutaProtegida roles={["admin", "evaluador"]}>
+                <ReporteEvaluacion />
               </RutaProtegida>
             }
           />
 
           <Route
-            path="evaluaciones/:id/reporte"
+            path="resultados"
             element={
-              <RutaProtegida roles={["admin", "evaluador"]}>
-                <ReporteEvaluacion />
+              <RutaProtegida roles={["admin"]}>
+                <Resultados />
               </RutaProtegida>
             }
           />
@@ -163,7 +216,17 @@ function AppRouter() {
               </RutaProtegida>
             }
           />
+
+          <Route
+            path="cambiar-password"
+            element={
+              <RutaProtegida roles={["admin", "evaluador"]}>
+                <CambiarPassword />
+              </RutaProtegida>
+            }
+          />
         </Route>
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );

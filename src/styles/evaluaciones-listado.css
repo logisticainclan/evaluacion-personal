@@ -1,0 +1,353 @@
+.evaluaciones-page {
+  display: grid;
+  gap: 22px;
+}
+
+.evaluaciones-page-header {
+  margin-bottom: 0;
+}
+
+.evaluaciones-kicker {
+  display: block;
+  margin-bottom: 6px;
+  color: #41619b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* =========================
+   RESUMEN
+========================= */
+
+.evaluaciones-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.evaluaciones-stat {
+  min-height: 104px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #e5e9ef;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.evaluaciones-stat-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 13px;
+}
+
+.eval-stat-total {
+  color: #1e40af;
+  background: #e8efff;
+}
+
+.eval-stat-pendiente {
+  color: #b45309;
+  background: #fff3d6;
+}
+
+.eval-stat-proceso {
+  color: #1d4ed8;
+  background: #e5edff;
+}
+
+.eval-stat-finalizada {
+  color: #15803d;
+  background: #e6f8ec;
+}
+
+.evaluaciones-stat span {
+  display: block;
+  margin-bottom: 5px;
+  color: #7b8794;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.evaluaciones-stat strong {
+  color: #172033;
+  font-size: 26px;
+}
+
+/* =========================
+   PROGRESO
+========================= */
+
+.evaluaciones-progress {
+  padding: 20px 22px;
+  border: 1px solid #e5e9ef;
+  border-radius: 17px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.evaluaciones-progress-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 12px;
+}
+
+.evaluaciones-progress-header strong {
+  color: #26344a;
+  font-size: 13px;
+}
+
+.evaluaciones-progress-header span {
+  color: #1e40af;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.evaluaciones-progress p {
+  margin: 9px 0 0;
+  color: #7b8794;
+  font-size: 11px;
+}
+
+/* =========================
+   SECCIONES
+========================= */
+
+.evaluaciones-section {
+  display: grid;
+  gap: 12px;
+}
+
+.evaluaciones-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.evaluaciones-section-header h2 {
+  margin: 0;
+  color: #26344a;
+  font-size: 16px;
+}
+
+.evaluaciones-section-count {
+  min-width: 27px;
+  height: 27px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #eef2f7;
+  color: #667085;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+/* =========================
+   TARJETAS
+========================= */
+
+.evaluaciones-list {
+  display: grid;
+  gap: 11px;
+}
+
+.evaluacion-list-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 17px 19px;
+  border: 1px solid #e5e9ef;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.045);
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.evaluacion-list-card:hover {
+  border-color: #d7deea;
+  box-shadow: 0 9px 24px rgba(15, 23, 42, 0.07);
+  transform: translateY(-1px);
+}
+
+.evaluacion-person {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.evaluacion-avatar {
+  width: 43px;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 12px;
+  color: #166534;
+  background: #e8f6ed;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.evaluacion-person-info {
+  min-width: 0;
+}
+
+.evaluacion-person-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.evaluacion-person-title h3 {
+  margin: 0;
+  color: #202d42;
+  font-size: 13px;
+}
+
+.evaluacion-person-info p {
+  margin: 5px 0 0;
+  color: #7b8794;
+  font-size: 11px;
+}
+
+.evaluacion-promedio {
+  display: inline-block;
+  margin-top: 6px;
+  color: #1e40af;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.evaluacion-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.evaluacion-state::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.evaluacion-state.pendiente {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.evaluacion-state.pendiente::before {
+  background: #f59e0b;
+}
+
+.evaluacion-state.proceso {
+  color: #1e40af;
+  background: #dbeafe;
+}
+
+.evaluacion-state.proceso::before {
+  background: #2563eb;
+}
+
+.evaluacion-state.finalizada {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.evaluacion-state.finalizada::before {
+  background: #16a34a;
+}
+
+.evaluacion-list-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.evaluaciones-empty {
+  padding: 26px;
+  border: 1px dashed #d7dde5;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #98a2b3;
+  font-size: 11px;
+  text-align: center;
+}
+
+@media (max-width: 1000px) {
+  .evaluaciones-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .evaluaciones-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .evaluacion-list-card {
+    grid-template-columns: 1fr;
+  }
+
+  .evaluacion-list-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+.evaluaciones-historial {
+  display: grid;
+  gap: 18px;
+}
+
+.evaluaciones-historial-periodo {
+  padding: 18px;
+  border: 1px solid #e5e9ef;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.evaluaciones-historial-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.evaluaciones-historial-header strong {
+  display: block;
+  color: #26344a;
+  font-size: 14px;
+}
+
+.evaluaciones-historial-header span {
+  display: block;
+  margin-top: 3px;
+  color: #98a2b3;
+  font-size: 10px;
+}

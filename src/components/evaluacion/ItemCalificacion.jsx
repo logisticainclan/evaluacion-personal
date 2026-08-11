@@ -3,19 +3,20 @@ function ItemCalificacion({
   niveles,
   respuestas,
   setRespuestas,
-  disabled = false
+  disabled = false,
+  modoPreview = false,
 }) {
   const seleccionarNivel = (nivel) => {
-    if (disabled) return
+    if (disabled || modoPreview) return;
 
     setRespuestas((prev) => ({
       ...prev,
       [item.id]: {
         nivel_id: nivel.id,
-        puntaje: nivel.puntaje
-      }
-    }))
-  }
+        puntaje: nivel.puntaje,
+      },
+    }));
+  };
 
   return (
     <div className="item-calificacion">
@@ -25,24 +26,28 @@ function ItemCalificacion({
 
       <div className="nivel-buttons">
         {niveles.map((nivel) => {
-          const activo = respuestas[item.id]?.nivel_id === nivel.id
+          const activo =
+            respuestas[item.id]?.nivel_id === nivel.id;
 
           return (
             <button
               key={nivel.id}
               type="button"
-              disabled={disabled}
-              className={`nivel-btn ${activo ? 'active' : ''}`}
+              disabled={disabled && !modoPreview}
+              className={`nivel-btn ${
+                activo ? "active" : ""
+              } ${modoPreview ? "nivel-btn-preview" : ""}`}
               onClick={() => seleccionarNivel(nivel)}
+              tabIndex={modoPreview ? -1 : undefined}
             >
               <strong>{nivel.nombre}</strong>
               <span>{nivel.puntaje} pts</span>
             </button>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }
 
-export default ItemCalificacion
+export default ItemCalificacion;

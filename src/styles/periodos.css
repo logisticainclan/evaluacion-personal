@@ -1,0 +1,386 @@
+.periodos-page {
+  display: grid;
+  gap: 22px;
+}
+
+.periodos-page-header {
+  margin-bottom: 0;
+}
+
+.periodos-kicker {
+  display: block;
+  margin-bottom: 6px;
+  color: #41619b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* ACTIVO */
+
+.periodo-activo-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #0f5132, #277a55);
+  color: white;
+  box-shadow: 0 10px 25px rgba(15, 81, 50, .14);
+}
+
+.periodo-activo-card span {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  opacity: .8;
+}
+
+.periodo-activo-card h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.periodo-activo-card p {
+  margin: 7px 0 0;
+  font-size: 12px;
+  opacity: .85;
+}
+
+.periodo-activo-card > strong {
+  padding: 8px 13px;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 999px;
+  background: rgba(255,255,255,.12);
+  font-size: 11px;
+}
+
+.periodo-sin-activo {
+  padding: 20px;
+  border: 1px dashed #d7dde5;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.periodo-sin-activo strong {
+  color: #344054;
+}
+
+.periodo-sin-activo p {
+  margin: 5px 0 0;
+  color: #7b8794;
+  font-size: 11px;
+}
+
+/* STATS */
+
+.periodos-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.periodo-stat-card {
+  min-height: 102px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #e5e9ef;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(15,23,42,.05);
+}
+
+.periodo-stat-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 13px;
+}
+
+.periodo-stat-blue {
+  color: #1e40af;
+  background: #e8efff;
+}
+
+.periodo-stat-green {
+  color: #15803d;
+  background: #e6f8ec;
+}
+
+.periodo-stat-orange {
+  color: #b45309;
+  background: #fff3d6;
+}
+
+.periodo-stat-violet {
+  color: #7c3aed;
+  background: #f1eaff;
+}
+
+.periodo-stat-card span {
+  display: block;
+  margin-bottom: 5px;
+  color: #7b8794;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.periodo-stat-card strong {
+  color: #172033;
+  font-size: 26px;
+}
+
+/* PROGRESO */
+
+.periodos-progress-card {
+  padding: 20px 22px;
+  border: 1px solid #e5e9ef;
+  border-radius: 17px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(15,23,42,.05);
+}
+
+.periodos-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 11px;
+}
+
+.periodos-progress-header strong {
+  color: #344054;
+  font-size: 13px;
+}
+
+.periodos-progress-header span {
+  color: #1e40af;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.periodos-progress-card p {
+  margin: 9px 0 0;
+  color: #7b8794;
+  font-size: 11px;
+}
+
+/* CREAR AÑO */
+
+.periodos-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 22px;
+  border: 1px solid #e5e9ef;
+  border-radius: 17px;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(15,23,42,.05);
+}
+
+.periodos-toolbar h3 {
+  margin: 0;
+  color: #26344a;
+  font-size: 15px;
+}
+
+.periodos-toolbar p {
+  margin: 5px 0 0;
+  color: #7b8794;
+  font-size: 11px;
+}
+
+.periodos-create-row {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+
+.periodos-create-row input {
+  width: 120px;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d7dde5;
+  border-radius: 10px;
+  outline: none;
+  background: #fbfcfd;
+}
+
+.periodos-create-row input:focus {
+  border-color: #34805a;
+  box-shadow: 0 0 0 4px rgba(52,128,90,.1);
+}
+
+/* TABLA */
+
+.periodos-table-card {
+  overflow: hidden;
+  border: 1px solid #e5e9ef;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15,23,42,.055);
+}
+
+.periodos-table {
+  width: 100%;
+}
+
+.periodos-table th {
+  padding: 13px 15px;
+  background: #f7f9fc;
+  color: #667085;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.periodos-table td {
+  padding: 14px 15px;
+  color: #344054;
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.periodo-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.periodo-status.activo {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.periodo-status.pendiente {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.periodo-status.cerrado {
+  color: #667085;
+  background: #f2f4f7;
+}
+
+.periodos-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.periodo-bloqueado {
+  color: #98a2b3;
+  font-size: 10px;
+}
+
+/* MODAL */
+
+.periodo-modal-card {
+  width: min(560px, calc(100vw - 32px));
+  padding: 0;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(15,23,42,.28);
+}
+
+.periodo-modal-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 24px;
+  border-bottom: 1px solid #e8ecf1;
+}
+
+.periodo-modal-header h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 20px;
+}
+
+.periodo-modal-header p {
+  margin: 5px 0 0;
+  color: #7b8794;
+  font-size: 11px;
+}
+
+.periodo-modal-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 22px 24px;
+}
+
+.periodo-modal-field label {
+  display: block;
+  margin-bottom: 7px;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.periodo-modal-field input {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #d7dde5;
+  border-radius: 10px;
+  outline: none;
+  background: #fbfcfd;
+}
+
+.periodo-modal-field input:focus {
+  border-color: #34805a;
+  box-shadow: 0 0 0 4px rgba(52,128,90,.1);
+}
+
+.periodo-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 17px 24px;
+  border-top: 1px solid #e8ecf1;
+}
+
+@media (max-width: 900px) {
+  .periodos-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .periodos-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 600px) {
+  .periodos-stats,
+  .periodo-modal-body {
+    grid-template-columns: 1fr;
+  }
+
+  .periodos-create-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .periodos-create-row input {
+    width: 100%;
+  }
+}

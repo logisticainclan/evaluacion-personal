@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { useNavigate, useParams } from "react-router-dom";
 import { obtenerReporteEvaluacion } from "../services/reporteService";
@@ -30,21 +29,72 @@ function ReporteEvaluacion() {
 
   if (!evaluacion) return <p>Cargando reporte...</p>;
 
-  const detallesOrdenados = [...evaluacion.evaluacion_detalle].sort((a, b) => {
-    return (a.items?.secciones?.orden || 0) - (b.items?.secciones?.orden || 0);
-  });
+  const snapshot = evaluacion.ficha_snapshot;
 
   const secciones = {};
 
-  detallesOrdenados.forEach((d) => {
-    const nombre = d.items?.secciones?.nombre || "Sin sección";
+  if (snapshot) {
+    const seccionesSnapshot = [...(snapshot.secciones || [])].sort(
+      (a, b) => Number(a.orden || 0) - Number(b.orden || 0),
+    );
 
-    if (!secciones[nombre]) {
-      secciones[nombre] = [];
-    }
+    const itemsSnapshot = snapshot.items || [];
+    const nivelesSnapshot = snapshot.niveles || [];
 
-    secciones[nombre].push(d);
-  });
+    seccionesSnapshot.forEach((seccion) => {
+      const itemsSeccion = itemsSnapshot
+        .filter((item) => item.seccion_id === seccion.id)
+        .sort((a, b) => Number(a.orden || 0) - Number(b.orden || 0));
+
+      const filas = itemsSeccion
+        .map((item) => {
+          const detalle = evaluacion.evaluacion_detalle.find(
+            (d) => d.item_id === item.id,
+          );
+
+          if (!detalle) return null;
+
+          const nivel = nivelesSnapshot.find((n) => n.id === detalle.nivel_id);
+
+          return {
+            item_id: item.id,
+            descripcion: item.descripcion,
+            ayuda: item.ayuda || "",
+            nivel_nombre: nivel?.nombre || "Sin nivel",
+            puntaje: detalle.puntaje,
+          };
+        })
+        .filter(Boolean);
+
+      if (filas.length > 0) {
+        secciones[seccion.nombre] = filas;
+      }
+    });
+  } else {
+    /*
+     * Fallback para evaluaciones antiguas
+     * que todavía no tengan snapshot.
+     */
+    const detallesOrdenados = [...evaluacion.evaluacion_detalle].sort(
+      (a, b) =>
+        (a.items?.secciones?.orden || 0) - (b.items?.secciones?.orden || 0),
+    );
+
+    detallesOrdenados.forEach((d) => {
+      const nombre = d.items?.secciones?.nombre || "Sin sección";
+
+      if (!secciones[nombre]) {
+        secciones[nombre] = [];
+      }
+
+      secciones[nombre].push({
+        item_id: d.item_id,
+        descripcion: d.items?.descripcion || "",
+        nivel_nombre: d.niveles_calificacion?.nombre || "Sin nivel",
+        puntaje: d.puntaje,
+      });
+    });
+  }
 
   const obtenerNivel = (promedio) => {
     const p = Number(promedio);
@@ -176,8 +226,17 @@ function ReporteEvaluacion() {
     y += 5;
     pdf.text(`Cargo: ${evaluacion.personal?.cargo || "-"}`, 14, y);
     y += 5;
+
     pdf.text(`Área: ${evaluacion.personal?.area || "-"}`, 14, y);
     y += 5;
+
+    const nombreEvaluador = evaluacion.evaluador?.personal
+      ? `${evaluacion.evaluador.personal.apellidos}, ${evaluacion.evaluador.personal.nombres}`
+      : "No registrado";
+
+    pdf.text(`Evaluador: ${nombreEvaluador}`, 14, y);
+    y += 5;
+
     pdf.text(
       `Periodo: ${evaluacion.periodos?.anio} - ${evaluacion.periodos?.nombre}`,
       14,
@@ -201,8 +260,8 @@ function ReporteEvaluacion() {
         startY: y,
         head: [["Indicador", "Calificación", "Puntaje"]],
         body: items.map((d) => [
-          d.items?.descripcion || "",
-          d.niveles_calificacion?.nombre || "",
+          d.descripcion || "",
+          d.nivel_nombre || "",
           d.puntaje || "",
         ]),
         styles: {
@@ -360,8 +419,8 @@ function ReporteEvaluacion() {
             </p>
             <p>
               <strong>Evaluador:</strong>{" "}
-              {evaluacion.usuarios_app?.personal?.apellidos},{" "}
-              {evaluacion.usuarios_app?.personal?.nombres}
+              {evaluacion.evaluador?.personal?.apellidos || "-"},{" "}
+              {evaluacion.evaluador?.personal?.nombres || "-"}
             </p>
             <p>
               <strong>Periodo:</strong> {evaluacion.periodos?.anio} -{" "}
@@ -389,8 +448,8 @@ function ReporteEvaluacion() {
                 <tbody>
                   {items.map((d) => (
                     <tr key={d.item_id}>
-                      <td>{d.items?.descripcion}</td>
-                      <td>{d.niveles_calificacion?.nombre}</td>
+                      <td>{d.descripcion}</td>
+                      <td>{d.nivel_nombre}</td>
                       <td>{d.puntaje}</td>
                     </tr>
                   ))}

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { obtenerReporteGeneral } from "../services/reportesService";
-import { Card, StatCard, EmptyState } from "../components/ui";
 import { Toast } from "../lib/toast";
+import { ClipboardCheck, TrendingUp, Building2, Trophy } from "lucide-react";
+
+import "../styles/reportes.css";
 
 function Reportes() {
   const [registros, setRegistros] = useState([]);
@@ -36,7 +38,7 @@ function Reportes() {
     if (!areas[area]) {
       areas[area] = {
         total: 0,
-        suma: 0
+        suma: 0,
       };
     }
 
@@ -47,7 +49,7 @@ function Reportes() {
   const promedioPorArea = Object.entries(areas).map(([area, info]) => ({
     area,
     total: info.total,
-    promedio: info.suma / info.total
+    promedio: info.suma / info.total,
   }));
 
   const ranking = [...registros]
@@ -55,76 +57,165 @@ function Reportes() {
     .slice(0, 5);
 
   return (
-    <div>
-      <div className="page-header">
+  <div className="reportes-page">
+    <div className="page-header reportes-header">
+      <div>
+        <span className="reportes-kicker">
+          Análisis institucional
+        </span>
+
+        <h1>Reportes</h1>
+
+        <p>
+          Análisis general de las evaluaciones finalizadas.
+        </p>
+      </div>
+    </div>
+
+    <div className="reportes-stats">
+      <div className="reporte-stat-card">
+        <div className="reporte-stat-icon reporte-stat-blue">
+          <ClipboardCheck size={20} />
+        </div>
+
         <div>
-          <h1>Reportes</h1>
-          <p>Análisis general de evaluaciones finalizadas</p>
+          <span>Evaluaciones finalizadas</span>
+          <strong>{total}</strong>
         </div>
       </div>
 
-      <div className="stats-grid">
-        <StatCard title="Evaluaciones finalizadas" value={total} />
-        <StatCard title="Promedio general" value={promedioGeneral.toFixed(2)} />
-        <StatCard title="Áreas evaluadas" value={promedioPorArea.length} />
-        <StatCard title="Mayor promedio" value={ranking[0] ? Number(ranking[0].promedio).toFixed(2) : "0.00"} />
+      <div className="reporte-stat-card">
+        <div className="reporte-stat-icon reporte-stat-green">
+          <TrendingUp size={20} />
+        </div>
+
+        <div>
+          <span>Promedio general</span>
+          <strong>{promedioGeneral.toFixed(2)}</strong>
+        </div>
       </div>
 
-      <div className="dashboard-grid">
-        <Card className="dashboard-card">
-          <h2>Promedio por área</h2>
+      <div className="reporte-stat-card">
+        <div className="reporte-stat-icon reporte-stat-violet">
+          <Building2 size={20} />
+        </div>
 
-          {promedioPorArea.length === 0 && (
-            <EmptyState
-              title="Sin datos"
-              description="No hay evaluaciones finalizadas."
-            />
-          )}
+        <div>
+          <span>Áreas evaluadas</span>
+          <strong>{promedioPorArea.length}</strong>
+        </div>
+      </div>
 
-          {promedioPorArea.map((a) => (
-            <div className="area-row" key={a.area}>
-              <div>
-                <strong>{a.area}</strong>
-                <span>{a.total} evaluaciones</span>
-              </div>
+      <div className="reporte-stat-card">
+        <div className="reporte-stat-icon reporte-stat-orange">
+          <Trophy size={20} />
+        </div>
 
-              <div className="area-score">
-                <div className="progress-track">
-                  <div
-                    className="progress-fill"
-                    style={{ width: `${(Number(a.promedio) / 4) * 100}%` }}
-                  />
-                </div>
-
-                <strong>{Number(a.promedio).toFixed(2)}</strong>
-              </div>
-            </div>
-          ))}
-        </Card>
-
-        <Card className="dashboard-card">
-          <h2>Ranking general</h2>
-
-          {ranking.length === 0 && (
-            <EmptyState
-              title="Sin ranking"
-              description="No hay evaluaciones finalizadas."
-            />
-          )}
-
-          {ranking.map((r, index) => (
-            <div className="dashboard-row" key={r.id}>
-              <span>
-                {index + 1}. {r.personal?.apellidos}, {r.personal?.nombres}
-              </span>
-
-              <strong>{Number(r.promedio).toFixed(2)}</strong>
-            </div>
-          ))}
-        </Card>
+        <div>
+          <span>Mayor promedio</span>
+          <strong>
+            {ranking[0]
+              ? Number(ranking[0].promedio).toFixed(2)
+              : "0.00"}
+          </strong>
+        </div>
       </div>
     </div>
-  );
+
+    <div className="reportes-grid">
+      <section className="reporte-card">
+        <div className="reporte-card-header">
+          <h2>Promedio por área</h2>
+          <p>
+            Comparación del desempeño promedio entre las áreas evaluadas.
+          </p>
+        </div>
+
+        {promedioPorArea.length === 0 ? (
+          <div className="reportes-empty">
+            No hay evaluaciones finalizadas.
+          </div>
+        ) : (
+          <div className="reporte-area-list">
+            {promedioPorArea.map((a) => (
+              <div
+                className="reporte-area-row"
+                key={a.area}
+              >
+                <div className="reporte-area-top">
+                  <strong>{a.area}</strong>
+
+                  <span>
+                    {a.total} evaluación
+                    {a.total !== 1 ? "es" : ""}
+                  </span>
+                </div>
+
+                <div className="reporte-area-score">
+                  <div className="progress-track">
+                    <div
+                      className="progress-fill"
+                      style={{
+                        width: `${(Number(a.promedio) / 4) * 100}%`,
+                      }}
+                    />
+                  </div>
+
+                  <strong>
+                    {Number(a.promedio).toFixed(2)}
+                  </strong>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="reporte-card">
+        <div className="reporte-card-header">
+          <h2>Top 5 mejores promedios</h2>
+          <p>
+            Personal con los promedios más altos de las evaluaciones finalizadas.
+          </p>
+        </div>
+
+        {ranking.length === 0 ? (
+          <div className="reportes-empty">
+            No hay evaluaciones finalizadas.
+          </div>
+        ) : (
+          <div className="reporte-ranking">
+            {ranking.map((r, index) => (
+              <div
+                className="reporte-ranking-row"
+                key={r.id}
+              >
+                <div className="reporte-ranking-position">
+                  {index + 1}
+                </div>
+
+                <div className="reporte-ranking-person">
+                  <strong>
+                    {r.personal?.apellidos},{" "}
+                    {r.personal?.nombres}
+                  </strong>
+
+                  <span>
+                    {r.personal?.area || "Sin área"}
+                  </span>
+                </div>
+
+                <div className="reporte-ranking-score">
+                  {Number(r.promedio).toFixed(2)}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  </div>
+);
 }
 
 export default Reportes;

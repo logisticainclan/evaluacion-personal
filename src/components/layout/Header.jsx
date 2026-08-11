@@ -1,16 +1,45 @@
+import { UserRound } from "lucide-react";
+import { obtenerUsuarioActual } from "../../lib/auth";
+
 function Header() {
-  const usuario = JSON.parse(localStorage.getItem('usuario_app'))
+  const usuario = obtenerUsuarioActual();
+
+  const rolTexto =
+  usuario?.rol === "admin"
+    ? "Administrador"
+    : usuario?.rol === "evaluador"
+      ? "Evaluador"
+      : usuario?.rol || "-";
+
+  const nombreCompleto = [
+    usuario?.nombres,
+    usuario?.apellidos,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <header className="header">
-      <div>
-        <h2>Panel Administrativo</h2>
-        <p>Bienvenido, {usuario?.nombres} {usuario?.apellidos}</p>
+      <div className="header-brand">
+        <span className="header-eyebrow">
+          I.E. José Joaquín Inclán
+        </span>
+
+        <h2>Sistema de Evaluación del Personal</h2>
       </div>
 
-      <span className="role-badge">{usuario?.rol}</span>
+      <div className="header-user">
+        <div className="header-user-icon">
+          <UserRound size={19} />
+        </div>
+
+        <div className="header-user-info">
+          <strong>{nombreCompleto || "Usuario"}</strong>
+          <span>{rolTexto}</span>
+        </div>
+      </div>
     </header>
-  )
+  );
 }
 
-export default Header
+export default Header;

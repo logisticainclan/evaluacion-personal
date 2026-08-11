@@ -27,18 +27,34 @@ export async function obtenerPersonal() {
 }
 
 export async function obtenerPersonalAsignadoPeriodo() {
+  const { data: periodo, error } = await obtenerPeriodoActivo();
 
-  const { data: periodo } = await obtenerPeriodoActivo();
+  if (error || !periodo?.id) {
+    return {
+      data: [],
+      error: error || {
+        message: "No existe un período activo.",
+      },
+    };
+  }
 
   return await supabase
     .from("evaluador_personal")
     .select("personal_id")
     .eq("periodo_id", periodo.id);
-
 }
 
 export async function obtenerAsignaciones(evaluadorId) {
-  const { data: periodo } = await obtenerPeriodoActivo();
+  const { data: periodo, error } = await obtenerPeriodoActivo();
+
+  if (error || !periodo?.id) {
+    return {
+      data: [],
+      error: error || {
+        message: "No existe un período activo.",
+      },
+    };
+  }
 
   return await supabase
     .from("evaluador_personal")
@@ -47,25 +63,15 @@ export async function obtenerAsignaciones(evaluadorId) {
     .eq("periodo_id", periodo.id);
 }
 
-export async function guardarAsignaciones(evaluadorId, personalIds) {
-
-  const { data: periodo } = await obtenerPeriodoActivo();
-
-  await supabase
-    .from("evaluador_personal")
-    .delete()
-    .eq("evaluador_id", evaluadorId)
-    .eq("periodo_id", periodo.id);
-
-  if (personalIds.length === 0) return;
-
-  const registros = personalIds.map(id => ({
-    evaluador_id: evaluadorId,
-    personal_id: id,
-    periodo_id: periodo.id
-  }));
-
-  return await supabase
-    .from("evaluador_personal")
-    .insert(registros);
+export async function guardarAsignaciones(
+  evaluadorId,
+  personalIds
+) {
+  return await supabase.rpc(
+    "guardar_asignaciones_evaluador",
+    {
+      p_evaluador_id: evaluadorId,
+      p_personal_ids: personalIds,
+    }
+  );
 }

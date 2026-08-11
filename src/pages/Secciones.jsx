@@ -1,120 +1,150 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
 import { Toast } from "../lib/toast";
 import {
   obtenerSecciones,
   crearSeccion,
   actualizarSeccion,
-  eliminarSeccion
-} from '../services/seccionesService'
+  eliminarSeccion,
+} from "../services/seccionesService";
 
 const formInicial = {
-  nombre: '',
+  nombre: "",
   orden: 1,
-  activo: true
-}
+  activo: true,
+};
 
-function Secciones() {
-  const [secciones, setSecciones] = useState([])
-  const [modal, setModal] = useState(false)
-  const [editando, setEditando] = useState(null)
-  const [form, setForm] = useState(formInicial)
+function Secciones({ integrado = false }) {
+  const [secciones, setSecciones] = useState([]);
+  const [modal, setModal] = useState(false);
+  const [editando, setEditando] = useState(null);
+  const [form, setForm] = useState(formInicial);
 
   useEffect(() => {
-    cargarSecciones()
-  }, [])
+    cargarSecciones();
+  }, []);
 
   const cargarSecciones = async () => {
-    const { data, error } = await obtenerSecciones()
+    const { data, error } = await obtenerSecciones();
 
     if (error) {
       Toast.error(error.message);
-      return
+      return;
     }
 
-    setSecciones(data || [])
-  }
+    setSecciones(data || []);
+  };
 
   const abrirNuevo = () => {
-    setEditando(null)
+    setEditando(null);
     setForm({
       ...formInicial,
-      orden: secciones.length + 1
-    })
-    setModal(true)
-  }
+      orden: secciones.length + 1,
+    });
+    setModal(true);
+  };
 
   const abrirEditar = (seccion) => {
-    setEditando(seccion)
+    setEditando(seccion);
     setForm({
       nombre: seccion.nombre,
       orden: seccion.orden,
-      activo: seccion.activo
-    })
-    setModal(true)
-  }
+      activo: seccion.activo,
+    });
+    setModal(true);
+  };
 
   const guardar = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     const datos = {
       nombre: form.nombre.trim(),
       orden: Number(form.orden),
-      activo: form.activo
-    }
+      activo: form.activo,
+    };
 
     const respuesta = editando
       ? await actualizarSeccion(editando.id, datos)
-      : await crearSeccion(datos)
+      : await crearSeccion(datos);
 
     if (respuesta.error) {
       Toast.error(respuesta.error.message);
-      return
+      return;
     }
 
-    setModal(false)
-    setEditando(null)
-    setForm(formInicial)
-    cargarSecciones()
-  }
+    Toast.success(
+      editando
+        ? "Sección actualizada correctamente"
+        : "Sección creada correctamente",
+    );
+
+    setModal(false);
+    setEditando(null);
+    setForm(formInicial);
+    await cargarSecciones();
+  };
 
   const cambiarEstado = async (seccion) => {
     const { error } = await actualizarSeccion(seccion.id, {
-      activo: !seccion.activo
-    })
+      activo: !seccion.activo,
+    });
 
     if (error) {
       Toast.error(error.message);
-      return
+      return;
     }
 
-    cargarSecciones()
-  }
+    Toast.success(
+      seccion.activo
+        ? "Sección inactivada correctamente"
+        : "Sección activada correctamente",
+    );
+
+    await cargarSecciones();
+  };
 
   const eliminar = async (id) => {
-    if (!confirm('¿Seguro que deseas eliminar esta sección?')) return
+    if (!confirm("¿Seguro que deseas eliminar esta sección?")) return;
 
-    const { error } = await eliminarSeccion(id)
+    const { error } = await eliminarSeccion(id);
 
     if (error) {
       Toast.error(error.message);
-      return
+      return;
     }
 
-    cargarSecciones()
-  }
+    cargarSecciones();
+  };
 
   return (
     <div>
-      <div className="page-header">
-        <div>
-          <h1>Secciones</h1>
-          <p>Secciones de la ficha de evaluación</p>
-        </div>
+      {!integrado && (
+        <div className="page-header">
+          <div>
+            <h1>Secciones</h1>
+            <p>Secciones de la ficha de evaluación</p>
+          </div>
 
-        <button className="primary-btn" onClick={abrirNuevo}>
-          Nueva sección
-        </button>
-      </div>
+          <button className="primary-btn" onClick={abrirNuevo}>
+            Nueva sección
+          </button>
+        </div>
+      )}
+
+      {integrado && (
+        <div className="ficha-subheader">
+          <div>
+            <span className="ficha-subheader-kicker">Estructura</span>
+
+            <h2>Secciones de la ficha</h2>
+
+            <p>Organiza los bloques principales que conforman la evaluación.</p>
+          </div>
+
+          <button className="primary-btn" type="button" onClick={abrirNuevo}>
+            Nueva sección
+          </button>
+        </div>
+      )}
 
       <div className="table-card">
         <table>
@@ -133,15 +163,17 @@ function Secciones() {
                 <td>{s.orden}</td>
                 <td>{s.nombre}</td>
                 <td>
-                  <span className={`status ${s.activo ? 'activo' : 'inactivo'}`}>
-                    {s.activo ? 'Activo' : 'Inactivo'}
+                  <span
+                    className={`status ${s.activo ? "activo" : "inactivo"}`}
+                  >
+                    {s.activo ? "Activo" : "Inactivo"}
                   </span>
                 </td>
                 <td>
                   <div className="actions">
                     <button onClick={() => abrirEditar(s)}>Editar</button>
                     <button onClick={() => cambiarEstado(s)}>
-                      {s.activo ? 'Inactivar' : 'Activar'}
+                      {s.activo ? "Inactivar" : "Activar"}
                     </button>
                     <button className="danger" onClick={() => eliminar(s.id)}>
                       Eliminar
@@ -165,7 +197,7 @@ function Secciones() {
       {modal && (
         <div className="modal-bg">
           <form className="modal-card" onSubmit={guardar}>
-            <h2>{editando ? 'Editar sección' : 'Nueva sección'}</h2>
+            <h2>{editando ? "Editar sección" : "Nueva sección"}</h2>
 
             <label>Nombre de la sección</label>
             <input
@@ -204,7 +236,7 @@ function Secciones() {
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default Secciones
+export default Secciones;

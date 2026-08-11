@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import { obtenerUsuarioActual } from "../lib/auth";
 
 export async function obtenerPersonalAsignado(evaluadorId, periodoId) {
   return await supabase
@@ -55,12 +56,85 @@ export async function obtenerFicha() {
   return { secciones, items, niveles };
 }
 
+async function obtenerSnapshotFicha() {
+  const ficha = await obtenerFicha();
+
+  if (ficha.secciones.error) {
+    return {
+      data: null,
+      error: ficha.secciones.error,
+    };
+  }
+
+  if (ficha.items.error) {
+    return {
+      data: null,
+      error: ficha.items.error,
+    };
+  }
+
+  if (ficha.niveles.error) {
+    return {
+      data: null,
+      error: ficha.niveles.error,
+    };
+  }
+
+  return {
+    data: {
+      secciones: (ficha.secciones.data || []).map((s) => ({
+        id: s.id,
+        nombre: s.nombre,
+        orden: s.orden,
+      })),
+
+      items: (ficha.items.data || []).map((i) => ({
+        id: i.id,
+        seccion_id: i.seccion_id,
+        descripcion: i.descripcion,
+        ayuda: i.ayuda || "",
+        orden: i.orden,
+      })),
+
+      niveles: (ficha.niveles.data || []).map((n) => ({
+        id: n.id,
+        nombre: n.nombre,
+        puntaje: Number(n.puntaje),
+        orden: n.orden,
+      })),
+    },
+
+    error: null,
+  };
+}
+
 export async function obtenerPeriodoActivo() {
-  return await supabase
+  const { data, error } = await supabase
     .from("periodos")
     .select("*")
     .eq("estado", "activo")
-    .single();
+    .maybeSingle();
+
+  if (error) {
+    return {
+      data: null,
+      error,
+    };
+  }
+
+  if (!data) {
+    return {
+      data: null,
+      error: {
+        message: "No hay un período de evaluación activo.",
+      },
+    };
+  }
+
+  return {
+    data,
+    error: null,
+  };
 }
 
 export async function obtenerPanelEvaluaciones() {
@@ -119,11 +193,26 @@ export async function obtenerPanelEvaluaciones() {
     };
   });
 
-  return { data, error: null };
+  return {
+  data,
+  periodo: periodoActivo.data,
+  error: null,
+};
 }
 
 export async function obtenerEvaluacionPorId(id) {
-  return await supabase
+  const usuario = obtenerUsuarioActual();
+
+  if (!usuario?.id) {
+    return {
+      data: null,
+      error: {
+        message: "No se encontró una sesión válida.",
+      },
+    };
+  }
+
+  let consulta = supabase
     .from("evaluaciones")
     .select(`
       *,
@@ -138,7 +227,8 @@ export async function obtenerEvaluacionPorId(id) {
       periodos (
         id,
         anio,
-        nombre
+        nombre,
+        estado
       ),
       evaluacion_detalle (
         item_id,
@@ -146,8 +236,38 @@ export async function obtenerEvaluacionPorId(id) {
         puntaje
       )
     `)
-    .eq("id", id)
-    .single();
+    .eq("id", id);
+
+  /*
+    El administrador puede consultar evaluaciones
+    desde Resultados y Reportes.
+
+    El evaluador solamente puede consultar las suyas.
+  */
+  if (usuario.rol !== "admin") {
+    consulta = consulta.eq("evaluador_id", usuario.id);
+  }
+
+  const { data, error } = await consulta.maybeSingle();
+
+  if (error) {
+    return { data: null, error };
+  }
+
+  if (!data) {
+    return {
+      data: null,
+      error: {
+        message:
+          "La evaluación no existe o no tienes permiso para acceder a ella.",
+      },
+    };
+  }
+
+  return {
+    data,
+    error: null,
+  };
 }
 
 export async function guardarEvaluacionCompleta({
@@ -158,6 +278,82 @@ export async function guardarEvaluacionCompleta({
   observacion,
   respuestas
 }) {
+  const usuario = obtenerUsuarioActual();
+
+if (!usuario?.id) {
+  return {
+    data: null,
+    error: {
+      message: "No se encontró una sesión válida.",
+    },
+  };
+}
+
+if (usuario.id !== evaluadorId) {
+  return {
+    data: null,
+    error: {
+      message: "El usuario evaluador no coincide con la sesión actual.",
+    },
+  };
+}
+
+const { data: periodoEvaluacion, error: errorPeriodo } = await supabase
+  .from("periodos")
+  .select("id, estado")
+  .eq("id", periodoId)
+  .maybeSingle();
+
+if (errorPeriodo) {
+  return {
+    data: null,
+    error: errorPeriodo,
+  };
+}
+
+if (!periodoEvaluacion) {
+  return {
+    data: null,
+    error: {
+      message: "No se encontró el período de la evaluación.",
+    },
+  };
+}
+
+if (periodoEvaluacion.estado !== "activo") {
+  return {
+    data: null,
+    error: {
+      message:
+        "El período de esta evaluación está cerrado y ya no admite modificaciones.",
+    },
+  };
+}
+
+const { data: asignacion, error: errorAsignacion } = await supabase
+  .from("evaluador_personal")
+  .select("personal_id")
+  .eq("evaluador_id", usuario.id)
+  .eq("personal_id", personalId)
+  .eq("periodo_id", periodoId)
+  .maybeSingle();
+
+if (errorAsignacion) {
+  return {
+    data: null,
+    error: errorAsignacion,
+  };
+}
+
+if (!asignacion) {
+  return {
+    data: null,
+    error: {
+      message:
+        "Este personal no está asignado a tu usuario para el período actual.",
+    },
+  };
+}
   const detalle = Object.entries(respuestas);
 
   const puntajeTotal = detalle.reduce(
@@ -169,11 +365,11 @@ export async function guardarEvaluacionCompleta({
 
   if (!evaluacionId) {
     const { data: existente, error: errorExistente } = await supabase
-      .from("evaluaciones")
-      .select("id, evaluador_id, estado")
-      .eq("personal_id", personalId)
-      .eq("periodo_id", periodoId)
-      .maybeSingle();
+  .from("evaluaciones")
+  .select("id, evaluador_id, estado, ficha_snapshot")
+  .eq("personal_id", personalId)
+  .eq("periodo_id", periodoId)
+  .maybeSingle();
 
     if (errorExistente) {
       return { data: null, error: errorExistente };
@@ -207,54 +403,118 @@ export async function guardarEvaluacionCompleta({
   let evaluacion;
 
   if (evaluacionId) {
-    const { data, error } = await supabase
-      .from("evaluaciones")
-      .update({
+    let snapshotParaGuardar = null;
+
+const { data: evaluacionActual, error: errorEvaluacionActual } = await supabase
+  .from("evaluaciones")
+  .select("ficha_snapshot")
+  .eq("id", evaluacionId)
+  .maybeSingle();
+
+if (errorEvaluacionActual) {
+  return {
+    data: null,
+    error: errorEvaluacionActual,
+  };
+}
+
+if (!evaluacionActual?.ficha_snapshot) {
+  const snapshot = await obtenerSnapshotFicha();
+
+  if (snapshot.error) {
+    return {
+      data: null,
+      error: snapshot.error,
+    };
+  }
+
+  snapshotParaGuardar = snapshot.data;
+}
+  const { data, error } = await supabase
+    .from("evaluaciones")
+    .update({
+  puntaje_total: puntajeTotal,
+  promedio,
+  observacion,
+  estado: "proceso",
+  updated_at: new Date().toISOString(),
+
+  ...(snapshotParaGuardar
+    ? { ficha_snapshot: snapshotParaGuardar }
+    : {}),
+})
+    .eq("id", evaluacionId)
+    .eq("evaluador_id", evaluadorId)
+    .neq("estado", "finalizada")
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    return {
+      data: null,
+      error,
+    };
+  }
+
+  if (!data) {
+    return {
+      data: null,
+      error: {
+        message:
+          "La evaluación no puede modificarse o ya fue finalizada.",
+      },
+    };
+  }
+
+  evaluacion = data;
+
+  const { error: errorEliminarDetalle } = await supabase
+    .from("evaluacion_detalle")
+    .delete()
+    .eq("evaluacion_id", evaluacionId);
+
+  if (errorEliminarDetalle) {
+    return {
+      data: null,
+      error: errorEliminarDetalle,
+    };
+  }
+} else {
+  const snapshot = await obtenerSnapshotFicha();
+
+  if (snapshot.error) {
+    return {
+      data: null,
+      error: snapshot.error,
+    };
+  }
+
+  const { data, error } = await supabase
+    .from("evaluaciones")
+    .insert([
+      {
+        personal_id: personalId,
+        evaluador_id: evaluadorId,
+        periodo_id: periodoId,
+        estado: "proceso",
         puntaje_total: puntajeTotal,
         promedio,
         observacion,
-        estado: "proceso",
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", evaluacionId)
-      .eq("evaluador_id", evaluadorId)
-      .neq("estado", "finalizada")
-      .select()
-      .single();
+        ficha_snapshot: snapshot.data,
+      },
+    ])
+    .select()
+    .single();
 
-    if (error) return { data: null, error };
-
-    evaluacion = data;
-
-    const { error: errorEliminarDetalle } = await supabase
-      .from("evaluacion_detalle")
-      .delete()
-      .eq("evaluacion_id", evaluacionId);
-
-    if (errorEliminarDetalle) {
-      return { data: null, error: errorEliminarDetalle };
-    }
-  } else {
-    const { data, error } = await supabase
-      .from("evaluaciones")
-      .insert([
-        {
-          personal_id: personalId,
-          evaluador_id: evaluadorId,
-          periodo_id: periodoId,
-          estado: "proceso",
-          puntaje_total: puntajeTotal,
-          promedio,
-          observacion
-        }
-      ])
-      .select()
-      .single();
-
-    if (error) return { data: null, error };
-
-    evaluacion = data;
+  if (error) {
+    return {
+      data: null,
+      error,
+    };
   }
+
+  evaluacion = data;
+}
 
   const detalleInsertar = detalle.map(([itemId, r]) => ({
     evaluacion_id: evaluacion.id,
@@ -275,12 +535,151 @@ export async function guardarEvaluacionCompleta({
 }
 
 export async function finalizarEvaluacion(id) {
-  return await supabase
+  const usuario = obtenerUsuarioActual();
+
+  if (!usuario?.id) {
+    return {
+      data: null,
+      error: {
+        message: "No se encontró una sesión válida.",
+      },
+    };
+  }
+
+  const { data: evaluacionActual, error: errorEvaluacion } = await supabase
+    .from("evaluaciones")
+    .select(`
+      id,
+      evaluador_id,
+      estado,
+      periodos (
+        estado
+      )
+    `)
+    .eq("id", id)
+    .eq("evaluador_id", usuario.id)
+    .maybeSingle();
+
+  if (errorEvaluacion) {
+    return {
+      data: null,
+      error: errorEvaluacion,
+    };
+  }
+
+  if (!evaluacionActual) {
+    return {
+      data: null,
+      error: {
+        message: "No tienes permiso para finalizar esta evaluación.",
+      },
+    };
+  }
+
+  if (evaluacionActual.estado === "finalizada") {
+    return {
+      data: null,
+      error: {
+        message: "Esta evaluación ya fue finalizada.",
+      },
+    };
+  }
+
+  if (evaluacionActual.periodos?.estado !== "activo") {
+    return {
+      data: null,
+      error: {
+        message:
+          "El período está cerrado y la evaluación ya no puede finalizarse.",
+      },
+    };
+  }
+
+  const { data, error } = await supabase
     .from("evaluaciones")
     .update({
       estado: "finalizada",
-      fecha_finalizacion: new Date(),
-      updated_at: new Date()
+      fecha_finalizacion: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     })
-    .eq("id", id);
+    .eq("id", id)
+    .eq("evaluador_id", usuario.id)
+    .neq("estado", "finalizada")
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    return {
+      data: null,
+      error,
+    };
+  }
+
+  if (!data) {
+    return {
+      data: null,
+      error: {
+        message: "No se pudo finalizar la evaluación.",
+      },
+    };
+  }
+
+  return {
+    data,
+    error: null,
+  };
+}
+
+export async function obtenerHistorialEvaluaciones() {
+  const usuario = obtenerUsuarioActual();
+
+  if (!usuario?.id) {
+    return {
+      data: [],
+      error: {
+        message: "No se encontró una sesión válida.",
+      },
+    };
+  }
+
+  const { data, error } = await supabase
+    .from("evaluaciones")
+    .select(`
+      id,
+      estado,
+      puntaje_total,
+      promedio,
+      observacion,
+      created_at,
+      fecha_finalizacion,
+      personal (
+        id,
+        dni,
+        nombres,
+        apellidos,
+        area,
+        cargo
+      ),
+      periodos (
+        id,
+        anio,
+        nombre,
+        estado
+      )
+    `)
+    .eq("evaluador_id", usuario.id)
+    .eq("periodos.estado", "cerrado")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return {
+      data: [],
+      error,
+    };
+  }
+
+  return {
+    data: data || [],
+    error: null,
+  };
 }
