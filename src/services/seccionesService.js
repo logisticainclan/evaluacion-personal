@@ -21,8 +21,57 @@ export async function actualizarSeccion(id, data) {
 }
 
 export async function eliminarSeccion(id) {
-  return await supabase
-    .from('secciones')
+  const { count, error: errorConteo } = await supabase
+    .from("items")
+    .select("*", { count: "exact", head: true })
+    .eq("seccion_id", id);
+
+  if (errorConteo) {
+    return {
+      data: null,
+      error: errorConteo,
+    };
+  }
+
+  if (count > 0) {
+    const { data, error } = await supabase
+      .from("secciones")
+      .update({ activo: false })
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      return {
+        data: null,
+        error,
+      };
+    }
+
+    return {
+      data,
+      error: null,
+      desactivado: true,
+    };
+  }
+
+  const { data, error } = await supabase
+    .from("secciones")
     .delete()
-    .eq('id', id)
+    .eq("id", id)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    return {
+      data: null,
+      error,
+    };
+  }
+
+  return {
+    data,
+    error: null,
+    desactivado: false,
+  };
 }

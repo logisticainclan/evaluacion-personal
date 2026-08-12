@@ -103,17 +103,25 @@ function Secciones({ integrado = false }) {
   };
 
   const eliminar = async (id) => {
-    if (!confirm("¿Seguro que deseas eliminar esta sección?")) return;
+  if (!confirm("¿Seguro que deseas eliminar esta sección?")) return;
 
-    const { error } = await eliminarSeccion(id);
+  const respuesta = await eliminarSeccion(id);
 
-    if (error) {
-      Toast.error(error.message);
-      return;
-    }
+  if (respuesta?.error) {
+    Toast.error(respuesta.error.message);
+    return;
+  }
 
-    cargarSecciones();
-  };
+  if (respuesta?.desactivado) {
+    Toast.success(
+      "La sección contiene ítems, por lo que se inactivó para conservar la estructura y el historial.",
+    );
+  } else {
+    Toast.success("Sección eliminada correctamente");
+  }
+
+  await cargarSecciones();
+};
 
   return (
     <div>

@@ -110,17 +110,25 @@ function Niveles({ integrado = false }) {
   };
 
   const eliminar = async (id) => {
-    if (!confirm("¿Seguro que deseas eliminar este nivel?")) return;
+  if (!confirm("¿Seguro que deseas eliminar este nivel?")) return;
 
-    const { error } = await eliminarNivel(id);
+  const respuesta = await eliminarNivel(id);
 
-    if (error) {
-      Toast.error(error.message);
-      return;
-    }
+  if (respuesta?.error) {
+    Toast.error(respuesta.error.message);
+    return;
+  }
 
-    cargarNiveles();
-  };
+  if (respuesta?.desactivado) {
+    Toast.success(
+      "El nivel ya fue utilizado en evaluaciones, por lo que se inactivó para conservar el historial.",
+    );
+  } else {
+    Toast.success("Nivel eliminado correctamente");
+  }
+
+  await cargarNiveles();
+};
 
   return (
     <div>
