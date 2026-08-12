@@ -120,17 +120,25 @@ await cargarDatos();
   };
 
   const eliminar = async (id) => {
-    if (!confirm("¿Seguro que deseas eliminar este ítem?")) return;
+  if (!confirm("¿Seguro que deseas eliminar este ítem?")) return;
 
-    const { error } = await eliminarItem(id);
+  const respuesta = await eliminarItem(id);
 
-    if (error) {
-      Toast.error(error.message);
-      return;
-    }
+  if (respuesta?.error) {
+    Toast.error(respuesta.error.message);
+    return;
+  }
 
-    cargarDatos();
-  };
+  if (respuesta?.desactivado) {
+    Toast.success(
+      "El ítem ya fue utilizado en evaluaciones, por lo que se inactivó para conservar el historial.",
+    );
+  } else {
+    Toast.success("Ítem eliminado correctamente");
+  }
+
+  await cargarDatos();
+};
 
   const itemsFiltrados = items.filter((item) =>
     `${item.secciones?.nombre || ""} ${item.descripcion}`

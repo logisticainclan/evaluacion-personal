@@ -27,5 +27,57 @@ export async function actualizarItem(id, data) {
 }
 
 export async function eliminarItem(id) {
-  return await supabase.from('items').delete().eq('id', id)
+  const { count, error: errorConteo } = await supabase
+    .from("evaluacion_detalle")
+    .select("*", { count: "exact", head: true })
+    .eq("item_id", id);
+
+  if (errorConteo) {
+    return {
+      data: null,
+      error: errorConteo,
+    };
+  }
+
+  if (count > 0) {
+    const { data, error } = await supabase
+      .from("items")
+      .update({ activo: false })
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      return {
+        data: null,
+        error,
+      };
+    }
+
+    return {
+      data,
+      error: null,
+      desactivado: true,
+    };
+  }
+
+  const { data, error } = await supabase
+    .from("items")
+    .delete()
+    .eq("id", id)
+    .select()
+    .maybeSingle();
+
+  if (error) {
+    return {
+      data: null,
+      error,
+    };
+  }
+
+  return {
+    data,
+    error: null,
+    desactivado: false,
+  };
 }
